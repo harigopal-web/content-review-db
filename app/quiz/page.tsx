@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import type { Medium, ContentType } from '@/lib/types';
+
+export const dynamic = 'force-dynamic';
 
 const CONTENT_TYPES: ContentType[] = [
   'Movies',

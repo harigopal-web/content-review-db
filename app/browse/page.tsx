@@ -23,7 +23,7 @@ const CONTENT_TYPES: ContentType[] = [
   'Home Improvement',
 ];
 
-export default function BrowsePage() {
+function BrowseContent() {
   const searchParams = useSearchParams();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<Entry[]>([]);
@@ -326,5 +326,22 @@ export default function BrowsePage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function BrowsePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Navigation />
+        <main className="container mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-500"></div>
+          </div>
+        </main>
+      </div>
+    }>
+      <BrowseContent />
+    </Suspense>
   );
 }
