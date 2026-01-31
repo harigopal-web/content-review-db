@@ -145,7 +145,7 @@ export default function BulkImportPage() {
         tags: entry.tags || [],
         poster_url: entry.poster_url || null,
         hall_of_fame: false,
-      }));
+      })) as any;
 
       const { error } = await supabase.from('entries').insert(entriesToInsert);
 
