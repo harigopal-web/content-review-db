@@ -41,7 +41,7 @@ export default function VotingInterface({ entryId }: VotingInterfaceProps) {
         total: 0,
       };
 
-      data?.forEach((vote) => {
+      (data as any)?.forEach((vote: any) => {
         summary.total++;
         if (vote.vote_type === 'agree') summary.agree++;
         if (vote.vote_type === 'disagree-higher') summary.disagree_higher++;
@@ -65,8 +65,8 @@ export default function VotingInterface({ entryId }: VotingInterfaceProps) {
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('votes')
+      const { error } = await (supabase
+        .from('votes') as any)
         .insert({ entry_id: entryId, vote_type: voteType });
 
       if (error) throw error;
