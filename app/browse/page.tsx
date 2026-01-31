@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search, Filter, X } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import EntryCard from '@/components/EntryCard';
 import { supabase } from '@/lib/supabase';
 import type { Entry, Medium, ContentType } from '@/lib/types';
+
+export const dynamic = 'force-dynamic';
 
 const CONTENT_TYPES: ContentType[] = [
   'Movies',
