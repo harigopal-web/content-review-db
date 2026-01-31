@@ -77,15 +77,15 @@ export default function AdminPage() {
     try {
       if (editingEntry) {
         // Update existing entry
-        const { error } = await supabase
-          .from('entries')
-          .update(formData as any)
+        const { error } = await (supabase
+          .from('entries') as any)
+          .update(formData)
           .eq('id', editingEntry.id);
 
         if (error) throw error;
       } else {
         // Create new entry
-        const { error } = await supabase.from('entries').insert([formData as any]);
+        const { error } = await (supabase.from('entries') as any).insert([formData]);
 
         if (error) throw error;
       }
