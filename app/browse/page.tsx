@@ -78,7 +78,7 @@ export default function BrowsePage() {
 
       // Extract all unique tags
       const tags = new Set<string>();
-      data?.forEach((entry) => {
+      (data as any)?.forEach((entry: any) => {
         entry.tags?.forEach((tag: string) => tags.add(tag));
       });
       setAllTags(Array.from(tags).sort());
