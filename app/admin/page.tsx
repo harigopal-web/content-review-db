@@ -129,8 +129,8 @@ export default function AdminPage() {
 
   const toggleHallOfFame = async (entry: Entry) => {
     try {
-      const { error } = await supabase
-        .from('entries')
+      const { error } = await (supabase
+        .from('entries') as any)
         .update({ hall_of_fame: !entry.hall_of_fame })
         .eq('id', entry.id);
 
