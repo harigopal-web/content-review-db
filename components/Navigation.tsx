@@ -2,27 +2,28 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Film, Star, Trophy, Award } from 'lucide-react';
+import { Home, Search, Sparkles, Star, Trophy, Award } from 'lucide-react';
 
 export default function Navigation() {
   const pathname = usePathname();
 
   const links = [
-    { href: '/browse', label: 'Browse', icon: Film },
+    { href: '/', label: 'Home', icon: Home },
+    { href: '/browse', label: 'Browse', icon: Search },
+    { href: '/quiz', label: 'Quiz', icon: Sparkles },
     { href: '/five-stars', label: '5-Star Shows', icon: Star },
     { href: '/top-10', label: 'Top 10', icon: Trophy },
-    // { href: '/hall-of-fame', label: 'Hall of Fame', icon: Award },
   ];
 
   return (
-    <nav className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="text-lg font-semibold text-gray-900 dark:text-white">
-            Gopal Content
+    <nav className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
+      <div className="container mx-auto px-6">
+        <div className="flex items-center justify-between h-20">
+          <Link href="/" className="font-serif text-2xl font-bold text-text-dark">
+            Paper Haven
           </Link>
 
-          <div className="flex gap-1 md:gap-2">
+          <div className="flex items-center gap-8">
             {links.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
@@ -31,14 +32,14 @@ export default function Navigation() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-sm ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
                     isActive
-                      ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                      ? 'bg-brown text-white font-medium'
+                      : 'text-text-medium hover:text-brown hover:bg-brown/5'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
-                  <span className="hidden sm:inline">{link.label}</span>
+                  <span className="hidden md:inline text-sm">{link.label}</span>
                 </Link>
               );
             })}
