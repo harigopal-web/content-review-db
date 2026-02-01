@@ -34,37 +34,37 @@ export default function FiveStarsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-cream">
       <Navigation />
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto mb-8 text-center">
+      <main className="container mx-auto px-6 py-12">
+        <div className="max-w-4xl mx-auto mb-12 text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Star className="w-12 h-12 fill-yellow-500 text-yellow-500" />
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+            <Star className="w-12 h-12 fill-brown text-brown" />
+            <h1 className="font-serif text-5xl font-bold text-text-dark">
               5-Star Shows
             </h1>
-            <Star className="w-12 h-12 fill-yellow-500 text-yellow-500" />
+            <Star className="w-12 h-12 fill-brown text-brown" />
           </div>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
+          <p className="text-xl text-text-medium">
             The absolute best of the best - shows and movies that earned a perfect score
           </p>
         </div>
 
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <div className="mb-8">
+          <h2 className="font-serif text-3xl font-bold text-text-dark">
             {loading ? 'Loading...' : `${entries.length} Perfect Ratings`}
           </h2>
         </div>
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-500"></div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-cream border-t-brown"></div>
           </div>
         ) : entries.length === 0 ? (
           <div className="text-center py-12">
-            <Star className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-            <p className="text-xl text-gray-600 dark:text-gray-400">No 5-star ratings yet</p>
+            <Star className="w-16 h-16 mx-auto mb-4 text-text-light" />
+            <p className="text-xl text-text-dark font-medium">No 5-star ratings yet</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

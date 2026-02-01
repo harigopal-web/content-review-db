@@ -138,39 +138,39 @@ function BrowseContent() {
   const hasActiveFilters = medium || contentType || selectedTags.length > 0 || minScore > 0 || mostRecent;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
+    <div className="min-h-screen bg-cream">
       <Navigation />
 
-      <main className="container mx-auto px-4 py-12">
+      <main className="container mx-auto px-6 py-12">
         <div className="max-w-6xl mx-auto mb-10">
-          <h1 className="text-4xl font-bold mb-3 text-gray-900 dark:text-white">
+          <h1 className="font-serif text-5xl font-bold mb-3 text-text-dark">
             Browse Content
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-8">
+          <p className="text-text-medium mb-8 text-lg">
             Filter and search through the complete database
           </p>
 
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-gray-600 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-6 py-3 border-2 border-brown text-brown hover:bg-brown hover:text-white rounded-full transition-all font-medium"
           >
             <Filter className="w-4 h-4" />
             <span className="text-sm font-medium">{showFilters ? 'Hide' : 'Show'} Filters</span>
             {hasActiveFilters && (
-              <span className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs px-2 py-0.5 rounded-full">
+              <span className="bg-brown text-white text-xs px-2 py-0.5 rounded-full">
                 {[medium, contentType, ...selectedTags].filter(Boolean).length + (minScore > 0 ? 1 : 0) + (mostRecent ? 1 : 0)}
               </span>
             )}
           </button>
 
           {showFilters && (
-            <div className="mt-6 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Filters</h2>
+            <div className="mt-6 p-8 bg-white rounded-xl shadow-lg border border-border">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="font-serif text-2xl font-semibold text-text-dark">Filters</h2>
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="flex items-center gap-1 text-sm text-red-500 hover:text-red-600"
+                    className="flex items-center gap-1 text-sm text-brown hover:text-brown-dark font-medium"
                   >
                     <X className="w-4 h-4" />
                     Clear All
@@ -181,36 +181,36 @@ function BrowseContent() {
               <div className="space-y-6">
                 {/* Medium Filter */}
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  <label className="block text-sm font-medium mb-3 text-text-dark">
                     Medium
                   </label>
                   <div className="flex gap-3">
                     <button
                       onClick={() => setMedium('')}
-                      className={`px-4 py-2 rounded-lg transition-colors ${
+                      className={`px-5 py-2 rounded-full transition-all font-medium ${
                         medium === ''
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                          ? 'bg-brown text-white shadow-md'
+                          : 'bg-cream text-text-medium hover:bg-brown hover:text-white border border-border'
                       }`}
                     >
                       All
                     </button>
                     <button
                       onClick={() => setMedium('Movie')}
-                      className={`px-4 py-2 rounded-lg transition-colors ${
+                      className={`px-5 py-2 rounded-full transition-all font-medium ${
                         medium === 'Movie'
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                          ? 'bg-brown text-white shadow-md'
+                          : 'bg-cream text-text-medium hover:bg-brown hover:text-white border border-border'
                       }`}
                     >
                       Movies
                     </button>
                     <button
                       onClick={() => setMedium('TV')}
-                      className={`px-4 py-2 rounded-lg transition-colors ${
+                      className={`px-5 py-2 rounded-full transition-all font-medium ${
                         medium === 'TV'
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                          ? 'bg-brown text-white shadow-md'
+                          : 'bg-cream text-text-medium hover:bg-brown hover:text-white border border-border'
                       }`}
                     >
                       TV Shows
@@ -220,13 +220,13 @@ function BrowseContent() {
 
                 {/* Type Filter */}
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  <label className="block text-sm font-medium mb-3 text-text-dark">
                     Type
                   </label>
                   <select
                     value={contentType}
                     onChange={(e) => setContentType(e.target.value as ContentType | '')}
-                    className="w-full px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white border-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 rounded-lg bg-cream text-text-dark border-2 border-border focus:ring-2 focus:ring-brown focus:border-brown"
                   >
                     <option value="">All Types</option>
                     {CONTENT_TYPES.map((type) => (
@@ -239,7 +239,7 @@ function BrowseContent() {
 
                 {/* Score Filter */}
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  <label className="block text-sm font-medium mb-3 text-text-dark">
                     Minimum Score: {minScore > 0 ? `${minScore}+ stars` : 'Any'}
                   </label>
                   <div className="flex gap-2">
@@ -247,10 +247,10 @@ function BrowseContent() {
                       <button
                         key={score}
                         onClick={() => setMinScore(score)}
-                        className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+                        className={`px-4 py-2 rounded-full text-sm transition-all font-medium ${
                           minScore === score
-                            ? 'bg-yellow-500 text-white'
-                            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                            ? 'bg-brown text-white shadow-md'
+                            : 'bg-cream text-text-medium hover:bg-brown hover:text-white border border-border'
                         }`}
                       >
                         {score === 0 ? 'Any' : `${score}+`}
@@ -266,9 +266,9 @@ function BrowseContent() {
                       type="checkbox"
                       checked={mostRecent}
                       onChange={(e) => setMostRecent(e.target.checked)}
-                      className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                      className="w-5 h-5 rounded border-border text-brown focus:ring-brown"
                     />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <span className="text-sm font-medium text-text-dark">
                       Most Recent Only (2024-2025)
                     </span>
                   </label>
@@ -277,7 +277,7 @@ function BrowseContent() {
                 {/* Tags Filter */}
                 {allTags.length > 0 && (
                   <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                    <label className="block text-sm font-medium mb-3 text-text-dark">
                       Tags (select one or more)
                     </label>
                     <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
@@ -285,10 +285,10 @@ function BrowseContent() {
                         <button
                           key={tag}
                           onClick={() => toggleTag(tag)}
-                          className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                          className={`px-3 py-1 rounded-full text-sm transition-all ${
                             selectedTags.includes(tag)
-                              ? 'bg-purple-500 text-white'
-                              : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                              ? 'bg-brown text-white shadow-md'
+                              : 'bg-cream text-text-medium hover:bg-brown hover:text-white border border-border'
                           }`}
                         >
                           {tag}
@@ -303,21 +303,21 @@ function BrowseContent() {
         </div>
 
         {/* Results */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <div className="mb-8">
+          <h2 className="font-serif text-3xl font-bold text-text-dark">
             {loading ? 'Loading...' : `${filteredEntries.length} Results`}
           </h2>
         </div>
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-500"></div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-cream border-t-brown"></div>
           </div>
         ) : filteredEntries.length === 0 ? (
           <div className="text-center py-12">
-            <Search className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-            <p className="text-xl text-gray-600 dark:text-gray-400">No results found</p>
-            <p className="text-gray-500 dark:text-gray-500 mt-2">Try adjusting your filters</p>
+            <Search className="w-16 h-16 mx-auto mb-4 text-text-light" />
+            <p className="text-xl text-text-dark font-medium">No results found</p>
+            <p className="text-text-medium mt-2">Try adjusting your filters</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -334,11 +334,11 @@ function BrowseContent() {
 export default function BrowsePage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-cream">
         <Navigation />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-6 py-12">
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-500"></div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-cream border-t-brown"></div>
           </div>
         </main>
       </div>

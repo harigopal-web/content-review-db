@@ -79,19 +79,19 @@ export default function QuizPage() {
         <div className="flex flex-col gap-4">
           <button
             onClick={() => { setMedium(''); setStep(step + 1); }}
-            className="px-8 py-6 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg text-xl transition-colors"
+            className="px-8 py-6 border-2 border-brown text-brown hover:bg-brown hover:text-white rounded-full text-xl transition-all font-medium"
           >
             Either - Surprise Me!
           </button>
           <button
             onClick={() => { setMedium('Movie'); setStep(step + 1); }}
-            className="px-8 py-6 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xl transition-colors"
+            className="px-8 py-6 bg-brown hover:bg-brown-dark text-white rounded-full text-xl transition-all font-medium shadow-md"
           >
             Movies
           </button>
           <button
             onClick={() => { setMedium('TV'); setStep(step + 1); }}
-            className="px-8 py-6 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-xl transition-colors"
+            className="px-8 py-6 bg-brown hover:bg-brown-dark text-white rounded-full text-xl transition-all font-medium shadow-md"
           >
             TV Shows
           </button>
@@ -106,7 +106,7 @@ export default function QuizPage() {
           <select
             value={contentType}
             onChange={(e) => setContentType(e.target.value as ContentType | '')}
-            className="w-full px-6 py-4 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white border-none focus:ring-2 focus:ring-blue-500 text-lg"
+            className="w-full px-6 py-4 rounded-lg bg-cream text-text-dark border-2 border-border focus:ring-2 focus:ring-brown focus:border-brown text-lg"
           >
             <option value="">Any Type</option>
             {CONTENT_TYPES.map((type) => (
@@ -117,7 +117,7 @@ export default function QuizPage() {
           </select>
           <button
             onClick={() => setStep(step + 1)}
-            className="w-full px-6 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-lg"
+            className="w-full px-6 py-4 bg-brown hover:bg-brown-dark text-white rounded-full transition-all flex items-center justify-center gap-2 text-lg font-medium shadow-md"
           >
             <span>Next</span>
             <ArrowRight className="w-5 h-5" />
@@ -142,10 +142,10 @@ export default function QuizPage() {
               <button
                 key={option.value}
                 onClick={() => setMinScore(option.value)}
-                className={`px-6 py-4 rounded-lg text-lg transition-colors ${
+                className={`px-6 py-4 rounded-full text-lg transition-all font-medium ${
                   minScore === option.value
-                    ? 'bg-yellow-500 text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600'
+                    ? 'bg-brown text-white shadow-md'
+                    : 'bg-cream text-text-medium hover:bg-brown hover:text-white border border-border'
                 }`}
               >
                 {option.label}
@@ -154,7 +154,7 @@ export default function QuizPage() {
           </div>
           <button
             onClick={() => setStep(step + 1)}
-            className="w-full px-6 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-lg"
+            className="w-full px-6 py-4 bg-brown hover:bg-brown-dark text-white rounded-full transition-all flex items-center justify-center gap-2 text-lg font-medium shadow-md"
           >
             <span>Next</span>
             <ArrowRight className="w-5 h-5" />
@@ -169,20 +169,20 @@ export default function QuizPage() {
         <div className="space-y-4">
           <button
             onClick={() => { setMostRecent(false); setStep(step + 1); }}
-            className={`w-full px-8 py-6 rounded-lg text-xl transition-colors ${
+            className={`w-full px-8 py-6 rounded-full text-xl transition-all font-medium ${
               !mostRecent
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600'
+                ? 'bg-brown text-white shadow-md'
+                : 'bg-cream text-text-medium hover:bg-brown hover:text-white border border-border'
             }`}
           >
             No - Show Me Everything
           </button>
           <button
             onClick={() => { setMostRecent(true); setStep(step + 1); }}
-            className={`w-full px-8 py-6 rounded-lg text-xl transition-colors ${
+            className={`w-full px-8 py-6 rounded-full text-xl transition-all font-medium ${
               mostRecent
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600'
+                ? 'bg-brown text-white shadow-md'
+                : 'bg-cream text-text-medium hover:bg-brown hover:text-white border border-border'
             }`}
           >
             Yes - Only 2024-2025
@@ -196,15 +196,15 @@ export default function QuizPage() {
       content: (
         <div className="space-y-4">
           {allTags.length > 0 ? (
-            <div className="flex flex-wrap gap-2 max-h-96 overflow-y-auto p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            <div className="flex flex-wrap gap-2 max-h-96 overflow-y-auto p-6 bg-cream rounded-lg border border-border">
               {allTags.map((tag) => (
                 <button
                   key={tag}
                   onClick={() => toggleTag(tag)}
-                  className={`px-4 py-2 rounded-full text-sm transition-colors ${
+                  className={`px-4 py-2 rounded-full text-sm transition-all ${
                     selectedTags.includes(tag)
-                      ? 'bg-purple-500 text-white'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600'
+                      ? 'bg-brown text-white shadow-md'
+                      : 'bg-white text-text-medium hover:bg-brown hover:text-white border border-border'
                   }`}
                 >
                   {tag}
@@ -212,11 +212,11 @@ export default function QuizPage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 dark:text-gray-400 text-center">Loading tags...</p>
+            <p className="text-text-medium text-center">Loading tags...</p>
           )}
           <button
             onClick={handleFinish}
-            className="w-full px-6 py-4 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-lg font-semibold"
+            className="w-full px-6 py-4 bg-brown hover:bg-brown-dark text-white rounded-full transition-all flex items-center justify-center gap-2 text-lg font-semibold shadow-lg"
           >
             <Sparkles className="w-5 h-5" />
             <span>Show Me Recommendations!</span>
@@ -229,35 +229,35 @@ export default function QuizPage() {
   const currentQuestion = questions[step];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-cream">
       <Navigation />
 
-      <main className="container mx-auto px-4 py-12">
+      <main className="container mx-auto px-6 py-12">
         <div className="max-w-2xl mx-auto">
           {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+          <div className="mb-10">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-medium text-text-medium">
                 Question {step + 1} of {questions.length}
               </span>
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <span className="text-sm font-medium text-text-medium">
                 {Math.round(((step + 1) / questions.length) * 100)}%
               </span>
             </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <div className="w-full bg-white rounded-full h-3 border border-border">
               <div
-                className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                className="bg-brown h-full rounded-full transition-all duration-300"
                 style={{ width: `${((step + 1) / questions.length) * 100}%` }}
               ></div>
             </div>
           </div>
 
           {/* Question Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 mb-6">
-            <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
+          <div className="bg-white rounded-xl shadow-lg p-10 mb-8 border border-border">
+            <h1 className="font-serif text-4xl font-bold mb-3 text-text-dark">
               {currentQuestion.title}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-text-medium mb-8 text-lg">
               {currentQuestion.subtitle}
             </p>
 
@@ -269,7 +269,7 @@ export default function QuizPage() {
             {step > 0 && (
               <button
                 onClick={() => setStep(step - 1)}
-                className="flex items-center gap-2 px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors"
+                className="flex items-center gap-2 px-6 py-3 border-2 border-brown text-brown hover:bg-brown hover:text-white rounded-full transition-all font-medium"
               >
                 <ArrowLeft className="w-5 h-5" />
                 <span>Back</span>
@@ -278,7 +278,7 @@ export default function QuizPage() {
             {step === 0 && (
               <button
                 onClick={() => router.push('/')}
-                className="flex items-center gap-2 px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors"
+                className="flex items-center gap-2 px-6 py-3 border-2 border-brown text-brown hover:bg-brown hover:text-white rounded-full transition-all font-medium"
               >
                 <ArrowLeft className="w-5 h-5" />
                 <span>Home</span>

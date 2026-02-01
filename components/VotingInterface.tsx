@@ -92,14 +92,14 @@ export default function VotingInterface({ entryId }: VotingInterfaceProps) {
     <div className="border-t pt-4">
       {!userVote ? (
         <div>
-          <p className="text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">
+          <p className="text-sm font-medium mb-3 text-text-dark">
             Do you agree with this rating?
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => handleVote('agree')}
               disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-brown hover:bg-brown-dark text-white rounded-full transition-colors disabled:opacity-50"
             >
               <ThumbsUp className="w-4 h-4" />
               <span>Yes</span>
@@ -107,7 +107,7 @@ export default function VotingInterface({ entryId }: VotingInterfaceProps) {
             <button
               onClick={() => setShowDisagreeOptions(!showDisagreeOptions)}
               disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-brown text-brown hover:bg-brown hover:text-white rounded-full transition-colors disabled:opacity-50"
             >
               <ThumbsDown className="w-4 h-4" />
               <span>No</span>
@@ -115,15 +115,15 @@ export default function VotingInterface({ entryId }: VotingInterfaceProps) {
           </div>
 
           {showDisagreeOptions && (
-            <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <p className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+            <div className="mt-3 p-3 bg-cream rounded-lg border border-border">
+              <p className="text-sm font-medium mb-2 text-text-dark">
                 Should it be higher or lower?
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleVote('disagree-higher')}
                   disabled={loading}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-brown hover:bg-brown-dark text-white rounded-full transition-colors disabled:opacity-50"
                 >
                   <ChevronUp className="w-4 h-4" />
                   <span>Higher</span>
@@ -131,7 +131,7 @@ export default function VotingInterface({ entryId }: VotingInterfaceProps) {
                 <button
                   onClick={() => handleVote('disagree-lower')}
                   disabled={loading}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-brown hover:bg-brown-dark text-white rounded-full transition-colors disabled:opacity-50"
                 >
                   <ChevronDown className="w-4 h-4" />
                   <span>Lower</span>
@@ -141,8 +141,8 @@ export default function VotingInterface({ entryId }: VotingInterfaceProps) {
           )}
         </div>
       ) : (
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          <p className="font-medium mb-2">Thanks for voting!</p>
+        <div className="text-sm text-text-medium">
+          <p className="font-medium mb-2 text-text-dark">Thanks for voting!</p>
           <div className="space-y-1">
             <p>{agreePercentage}% agree ({voteSummary.agree} votes)</p>
             {disagreeTotal > 0 && (
@@ -157,7 +157,7 @@ export default function VotingInterface({ entryId }: VotingInterfaceProps) {
       )}
 
       {userVote && voteSummary.total === 0 && (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="text-sm text-text-light">
           <p>Be the first to vote!</p>
         </div>
       )}
