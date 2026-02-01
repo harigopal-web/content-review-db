@@ -138,26 +138,28 @@ function BrowseContent() {
   const hasActiveFilters = medium || contentType || selectedTags.length > 0 || minScore > 0 || mostRecent;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
       <Navigation />
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto mb-8">
-          <h1 className="text-4xl font-bold mb-4 text-center text-gray-900 dark:text-white">
-            Browse All Content
+      <main className="container mx-auto px-4 py-12">
+        <div className="max-w-6xl mx-auto mb-10">
+          <h1 className="text-4xl font-bold mb-3 text-gray-900 dark:text-white">
+            Browse Content
           </h1>
-          <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
-            Use the filters below to find your next favorite show or movie
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            Filter and search through the complete database
           </p>
 
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 mx-auto px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-800 hover:border-gray-900 dark:hover:border-gray-600 rounded-lg transition-colors"
           >
-            <Filter className="w-5 h-5" />
-            <span>{showFilters ? 'Hide' : 'Show'} Filters</span>
+            <Filter className="w-4 h-4" />
+            <span className="text-sm font-medium">{showFilters ? 'Hide' : 'Show'} Filters</span>
             {hasActiveFilters && (
-              <span className="bg-blue-700 text-xs px-2 py-1 rounded-full">Active</span>
+              <span className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs px-2 py-0.5 rounded-full">
+                {[medium, contentType, ...selectedTags].filter(Boolean).length + (minScore > 0 ? 1 : 0) + (mostRecent ? 1 : 0)}
+              </span>
             )}
           </button>
 
