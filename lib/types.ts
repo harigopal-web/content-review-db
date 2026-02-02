@@ -10,7 +10,14 @@ export type ContentType =
   | 'Reality Competition'
   | 'Reality Dating'
   | 'Comic Book Stuff'
-  | 'Home Improvement';
+  | 'Home Improvement'
+  | 'Drama'
+  | 'Horror'
+  | 'Comedy'
+  | 'Thriller'
+  | 'Romance'
+  | 'Action'
+  | 'Family';
 
 export interface Entry {
   id: string;

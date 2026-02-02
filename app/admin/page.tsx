@@ -5,8 +5,7 @@ import { Plus, Edit, Trash2, Award, Search } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Entry, Medium, ContentType } from '@/lib/types';
 
-const CONTENT_TYPES: ContentType[] = [
-  'Movies',
+const TV_TYPES: ContentType[] = [
   'Documentary/True Crime',
   'Sports',
   'Drama TV',
@@ -18,12 +17,28 @@ const CONTENT_TYPES: ContentType[] = [
   'Home Improvement',
 ];
 
+const MOVIE_TYPES: ContentType[] = [
+  'Comic Book Stuff',
+  'Documentary/True Crime',
+  'Drama',
+  'Horror',
+  'Comedy',
+  'Thriller',
+  'Romance',
+  'Action',
+  'Family',
+];
+
+const ALL_TYPES = [...new Set([...TV_TYPES, ...MOVIE_TYPES])].sort();
+
 export default function AdminPage() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
+  const [editingRowId, setEditingRowId] = useState<string | null>(null);
+  const [editingRowData, setEditingRowData] = useState<Partial<Entry>>({});
   const [searchQuery, setSearchQuery] = useState('');
 
   // Form state
@@ -138,6 +153,40 @@ export default function AdminPage() {
       await loadEntries();
     } catch (error) {
       console.error('Error updating Hall of Fame status:', error);
+    }
+  };
+
+  const startInlineEdit = (entry: Entry) => {
+    setEditingRowId(entry.id);
+    setEditingRowData({
+      title: entry.title,
+      year: entry.year,
+      score: entry.score,
+      medium: entry.medium || 'Movie',
+      type: entry.type || 'Movies',
+      tags: entry.tags || [],
+    });
+  };
+
+  const cancelInlineEdit = () => {
+    setEditingRowId(null);
+    setEditingRowData({});
+  };
+
+  const saveInlineEdit = async (id: string) => {
+    try {
+      const { error } = await (supabase
+        .from('entries') as any)
+        .update(editingRowData)
+        .eq('id', id);
+
+      if (error) throw error;
+      setEditingRowId(null);
+      setEditingRowData({});
+      await loadEntries();
+    } catch (error) {
+      console.error('Error updating entry:', error);
+      alert('Failed to update entry');
     }
   };
 
@@ -263,7 +312,7 @@ export default function AdminPage() {
                   className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   required
                 >
-                  {CONTENT_TYPES.map((type) => (
+                  {(formData.medium === 'TV' ? TV_TYPES : formData.medium === 'Movie' ? MOVIE_TYPES : ALL_TYPES).map((type) => (
                     <option key={type} value={type}>
                       {type}
                     </option>
@@ -403,68 +452,154 @@ export default function AdminPage() {
                   </td>
                 </tr>
               ) : (
-                filteredEntries.map((entry) => (
-                  <tr key={entry.id} className="hover:bg-gray-700/50 transition-colors">
-                    <td className="px-4 py-3 text-white">
-                      <div className="flex items-center gap-2">
-                        {entry.hall_of_fame && (
-                          <Award className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+                filteredEntries.map((entry) => {
+                  const isEditing = editingRowId === entry.id;
+
+                  return (
+                    <tr key={entry.id} className="hover:bg-gray-700/50 transition-colors">
+                      <td className="px-4 py-3 text-white">
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={editingRowData.title || ''}
+                            onChange={(e) => setEditingRowData({ ...editingRowData, title: e.target.value })}
+                            className="w-full px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+                          />
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            {entry.hall_of_fame && (
+                              <Award className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+                            )}
+                            <span className="line-clamp-1">{entry.title}</span>
+                          </div>
                         )}
-                        <span className="line-clamp-1">{entry.title}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-gray-300">{entry.year}</td>
-                    <td className="px-4 py-3 text-gray-300">{entry.score}</td>
-                    <td className="px-4 py-3 text-gray-300">{entry.medium}</td>
-                    <td className="px-4 py-3 text-gray-300 text-sm">{entry.type}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {entry.tags?.slice(0, 3).map((tag, i) => (
-                          <span
-                            key={i}
-                            className="text-xs bg-gray-600 text-gray-300 px-2 py-1 rounded"
+                      </td>
+                      <td className="px-4 py-3 text-gray-300">
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            min="2020"
+                            max="2026"
+                            value={editingRowData.year || 2024}
+                            onChange={(e) => setEditingRowData({ ...editingRowData, year: parseInt(e.target.value) })}
+                            className="w-20 px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+                          />
+                        ) : (
+                          entry.year
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-gray-300">
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            min="0"
+                            max="5"
+                            step="0.5"
+                            value={editingRowData.score || 3}
+                            onChange={(e) => setEditingRowData({ ...editingRowData, score: parseFloat(e.target.value) })}
+                            className="w-16 px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+                          />
+                        ) : (
+                          entry.score
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-gray-300">
+                        {isEditing ? (
+                          <select
+                            value={editingRowData.medium || 'Movie'}
+                            onChange={(e) => setEditingRowData({ ...editingRowData, medium: e.target.value as Medium })}
+                            className="w-full px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
                           >
-                            {tag}
-                          </span>
-                        ))}
-                        {entry.tags && entry.tags.length > 3 && (
-                          <span className="text-xs text-gray-400">
-                            +{entry.tags.length - 3}
-                          </span>
+                            <option value="Movie">Movie</option>
+                            <option value="TV">TV</option>
+                          </select>
+                        ) : (
+                          entry.medium
                         )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => toggleHallOfFame(entry)}
-                          className={`p-2 rounded transition-colors ${
-                            entry.hall_of_fame
-                              ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
-                              : 'bg-gray-600 hover:bg-gray-500 text-gray-300'
-                          }`}
-                          title="Toggle Hall of Fame"
-                        >
-                          <Award className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleEdit(entry)}
-                          className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
-                          title="Edit"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(entry.id)}
-                          className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="px-4 py-3 text-gray-300 text-sm">
+                        {isEditing ? (
+                          <select
+                            value={editingRowData.type || 'Movies'}
+                            onChange={(e) => setEditingRowData({ ...editingRowData, type: e.target.value as ContentType })}
+                            className="w-full px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none text-xs"
+                          >
+                            {(editingRowData.medium === 'TV' ? TV_TYPES : editingRowData.medium === 'Movie' ? MOVIE_TYPES : ALL_TYPES).map((type) => (
+                              <option key={type} value={type}>
+                                {type}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          entry.type
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          {entry.tags?.slice(0, 3).map((tag, i) => (
+                            <span
+                              key={i}
+                              className="text-xs bg-gray-600 text-gray-300 px-2 py-1 rounded"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                          {entry.tags && entry.tags.length > 3 && (
+                            <span className="text-xs text-gray-400">
+                              +{entry.tags.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        {isEditing ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => saveInlineEdit(entry.id)}
+                              className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm transition-colors"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={cancelInlineEdit}
+                              className="px-3 py-1 bg-gray-600 hover:bg-gray-500 text-white rounded text-sm transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => toggleHallOfFame(entry)}
+                              className={`p-2 rounded transition-colors ${
+                                entry.hall_of_fame
+                                  ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                                  : 'bg-gray-600 hover:bg-gray-500 text-gray-300'
+                              }`}
+                              title="Toggle Hall of Fame"
+                            >
+                              <Award className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => startInlineEdit(entry)}
+                              className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                              title="Edit"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(entry.id)}
+                              className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

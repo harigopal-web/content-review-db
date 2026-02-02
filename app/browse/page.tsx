@@ -10,8 +10,7 @@ import type { Entry, Medium, ContentType } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-const CONTENT_TYPES: ContentType[] = [
-  'Movies',
+const TV_TYPES: ContentType[] = [
   'Documentary/True Crime',
   'Sports',
   'Drama TV',
@@ -21,6 +20,18 @@ const CONTENT_TYPES: ContentType[] = [
   'Reality Dating',
   'Comic Book Stuff',
   'Home Improvement',
+];
+
+const MOVIE_TYPES: ContentType[] = [
+  'Comic Book Stuff',
+  'Documentary/True Crime',
+  'Drama',
+  'Horror',
+  'Comedy',
+  'Thriller',
+  'Romance',
+  'Action',
+  'Family',
 ];
 
 function BrowseContent() {
@@ -65,6 +76,16 @@ function BrowseContent() {
   useEffect(() => {
     applyFilters();
   }, [entries, medium, contentType, selectedTags, minScore, mostRecent]);
+
+  // Reset content type when medium changes
+  useEffect(() => {
+    if (medium && contentType) {
+      const availableTypes = medium === 'TV' ? TV_TYPES : MOVIE_TYPES;
+      if (!availableTypes.includes(contentType)) {
+        setContentType('');
+      }
+    }
+  }, [medium]);
 
   const loadEntries = async () => {
     try {
@@ -219,23 +240,25 @@ function BrowseContent() {
                 </div>
 
                 {/* Type Filter */}
-                <div>
-                  <label className="block text-sm font-medium mb-3 text-text-dark">
-                    Type
-                  </label>
-                  <select
-                    value={contentType}
-                    onChange={(e) => setContentType(e.target.value as ContentType | '')}
-                    className="w-full px-4 py-3 rounded-lg bg-cream text-text-dark border-2 border-border focus:ring-2 focus:ring-brown focus:border-brown"
-                  >
-                    <option value="">All Types</option>
-                    {CONTENT_TYPES.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {medium && (
+                  <div>
+                    <label className="block text-sm font-medium mb-3 text-text-dark">
+                      Type
+                    </label>
+                    <select
+                      value={contentType}
+                      onChange={(e) => setContentType(e.target.value as ContentType | '')}
+                      className="w-full px-4 py-3 rounded-lg bg-cream text-text-dark border-2 border-border focus:ring-2 focus:ring-brown focus:border-brown"
+                    >
+                      <option value="">All Types</option>
+                      {(medium === 'TV' ? TV_TYPES : MOVIE_TYPES).map((type) => (
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
                 {/* Score Filter */}
                 <div>

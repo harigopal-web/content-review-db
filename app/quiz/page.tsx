@@ -8,8 +8,7 @@ import type { Medium, ContentType } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-const CONTENT_TYPES: ContentType[] = [
-  'Movies',
+const TV_TYPES: ContentType[] = [
   'Documentary/True Crime',
   'Sports',
   'Drama TV',
@@ -19,6 +18,18 @@ const CONTENT_TYPES: ContentType[] = [
   'Reality Dating',
   'Comic Book Stuff',
   'Home Improvement',
+];
+
+const MOVIE_TYPES: ContentType[] = [
+  'Comic Book Stuff',
+  'Documentary/True Crime',
+  'Drama',
+  'Horror',
+  'Comedy',
+  'Thriller',
+  'Romance',
+  'Action',
+  'Family',
 ];
 
 export default function QuizPage() {
@@ -109,7 +120,7 @@ export default function QuizPage() {
             className="w-full px-6 py-4 rounded-lg bg-cream text-text-dark border-2 border-border focus:ring-2 focus:ring-brown focus:border-brown text-lg"
           >
             <option value="">Any Type</option>
-            {CONTENT_TYPES.map((type) => (
+            {(medium === 'TV' ? TV_TYPES : medium === 'Movie' ? MOVIE_TYPES : [...TV_TYPES, ...MOVIE_TYPES]).map((type) => (
               <option key={type} value={type}>
                 {type}
               </option>
