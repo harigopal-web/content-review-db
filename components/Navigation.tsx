@@ -19,7 +19,7 @@ export default function Navigation() {
     <nav className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between h-20">
-          <Link href="/" className="font-serif text-2xl font-bold text-text-dark">
+          <Link href="/" className="font-serif text-lg md:text-2xl font-bold text-text-dark">
             Gopal Family Content Engine
           </Link>
 
