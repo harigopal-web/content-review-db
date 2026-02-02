@@ -17,12 +17,23 @@ export default function Top10Page() {
 
   const loadTop10Entries = async () => {
     try {
+      const top10Titles = [
+        'Da 5 Bloods',
+        'Coco',
+        'American Factory',
+        'Station Eleven',
+        'Gladbeck: The Hostage Crisis',
+        'Fleishman is in Trouble',
+        'Creed',
+        'Barbie',
+        'Slave Play. Not a Movie. A Play.',
+        'Sinners'
+      ];
+
       const { data, error } = await supabase
         .from('entries')
         .select('*')
-        .order('score', { ascending: false })
-        .order('year', { ascending: false })
-        .limit(10);
+        .in('title', top10Titles);
 
       if (error) throw error;
       setEntries(data || []);
@@ -46,7 +57,7 @@ export default function Top10Page() {
             </h1>
           </div>
           <p className="text-xl text-text-medium">
-            The highest-rated shows and movies across all years
+            Our absolute favorites - the cream of the crop
           </p>
         </div>
 
@@ -60,18 +71,9 @@ export default function Top10Page() {
             <p className="text-xl text-text-dark font-medium">No entries yet</p>
           </div>
         ) : (
-          <div className="space-y-6">
-            {entries.map((entry, index) => (
-              <div key={entry.id} className="flex items-start gap-6">
-                <div className="flex-shrink-0 w-16 h-16 flex items-center justify-center">
-                  <span className="font-serif text-4xl font-bold text-brown">
-                    #{index + 1}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <EntryCard entry={entry} />
-                </div>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {entries.map((entry) => (
+              <EntryCard key={entry.id} entry={entry} />
             ))}
           </div>
         )}
