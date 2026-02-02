@@ -68,3 +68,22 @@ export interface TMDBResult {
   release_date?: string;
   first_air_date?: string;
 }
+
+export interface CurrentlyWatching {
+  id: string;
+  title: string;
+  medium: Medium | null;
+  poster_url?: string | null;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Recommendation {
+  id: string;
+  title: string;
+  medium: Medium | null;
+  reason?: string | null;
+  submitter_name?: string | null;
+  created_at: string;
+}

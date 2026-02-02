@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, Sparkles, Star, Trophy, Menu, X } from 'lucide-react';
+import { Home, Search, Sparkles, Star, Trophy, Eye, Menu, X } from 'lucide-react';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -13,6 +13,7 @@ export default function Navigation() {
     { href: '/', label: 'Home', icon: Home },
     { href: '/browse', label: 'Browse', icon: Search },
     { href: '/quiz', label: 'Quiz', icon: Sparkles },
+    { href: '/watching', label: 'Currently Watching', icon: Eye },
     { href: '/five-stars', label: '5-Star Shows', icon: Star },
     { href: '/top-10', label: 'Top 10', icon: Trophy },
   ];

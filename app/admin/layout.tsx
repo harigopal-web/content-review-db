@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Lock, Home, Upload, List } from 'lucide-react';
+import { Lock, Home, Upload, List, Eye, MessageSquare } from 'lucide-react';
 
 export default function AdminLayout({
   children,
@@ -135,6 +135,20 @@ export default function AdminLayout({
                 >
                   <Upload className="w-4 h-4" />
                   <span>Bulk Import</span>
+                </Link>
+                <Link
+                  href="/admin/watching"
+                  className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <Eye className="w-4 h-4" />
+                  <span>Currently Watching</span>
+                </Link>
+                <Link
+                  href="/admin/recommendations"
+                  className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Recommendations</span>
                 </Link>
               </div>
             </div>
