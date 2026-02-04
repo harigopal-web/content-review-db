@@ -54,6 +54,7 @@ export default function AdminPage() {
     series_name: '',
   });
   const [tagInput, setTagInput] = useState('');
+  const [inlineTagInput, setInlineTagInput] = useState('');
 
   useEffect(() => {
     loadEntries();
@@ -168,12 +169,14 @@ export default function AdminPage() {
       type: entry.type || 'Movies',
       tags: entry.tags || [],
       series_name: entry.series_name || '',
+      poster_url: entry.poster_url || '',
     });
   };
 
   const cancelInlineEdit = () => {
     setEditingRowId(null);
     setEditingRowData({});
+    setInlineTagInput('');
   };
 
   const saveInlineEdit = async (id: string) => {
@@ -186,6 +189,7 @@ export default function AdminPage() {
       if (error) throw error;
       setEditingRowId(null);
       setEditingRowData({});
+      setInlineTagInput('');
       await loadEntries();
     } catch (error) {
       console.error('Error updating entry:', error);
@@ -570,21 +574,54 @@ export default function AdminPage() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex flex-wrap gap-1">
-                          {entry.tags?.slice(0, 3).map((tag, i) => (
-                            <span
-                              key={i}
-                              className="text-xs bg-gray-600 text-gray-300 px-2 py-1 rounded"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {entry.tags && entry.tags.length > 3 && (
-                            <span className="text-xs text-gray-400">
-                              +{entry.tags.length - 3}
-                            </span>
-                          )}
-                        </div>
+                        {isEditing ? (
+                          <div className="space-y-1.5">
+                            <div className="flex flex-wrap gap-1">
+                              {(editingRowData.tags || []).map((tag, i) => (
+                                <span key={i} className="inline-flex items-center gap-1 text-xs bg-gray-600 text-gray-300 px-2 py-0.5 rounded">
+                                  {tag}
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingRowData({ ...editingRowData, tags: (editingRowData.tags || []).filter(t => t !== tag) })}
+                                    className="hover:text-red-400 ml-0.5"
+                                  >×</button>
+                                </span>
+                              ))}
+                            </div>
+                            <input
+                              type="text"
+                              value={inlineTagInput}
+                              onChange={(e) => setInlineTagInput(e.target.value)}
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  if (inlineTagInput.trim() && !(editingRowData.tags || []).includes(inlineTagInput.trim())) {
+                                    setEditingRowData({ ...editingRowData, tags: [...(editingRowData.tags || []), inlineTagInput.trim()] });
+                                    setInlineTagInput('');
+                                  }
+                                }
+                              }}
+                              className="w-full px-2 py-0.5 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none text-xs"
+                              placeholder="Add tag..."
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex flex-wrap gap-1">
+                            {entry.tags?.slice(0, 3).map((tag, i) => (
+                              <span
+                                key={i}
+                                className="text-xs bg-gray-600 text-gray-300 px-2 py-1 rounded"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                            {entry.tags && entry.tags.length > 3 && (
+                              <span className="text-xs text-gray-400">
+                                +{entry.tags.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         {isEditing ? (
@@ -633,21 +670,35 @@ export default function AdminPage() {
                         )}
                       </td>
                     </tr>
-                    {isEditing && editingRowData.series_name && (
+                    {isEditing && (
                       <tr className="bg-gray-700/30">
                         <td colSpan={7} className="px-4 py-2">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs text-blue-400 font-medium">
-                              {`Related in "${editingRowData.series_name}":`}
-                            </span>
-                            {relatedEntries.length > 0 ? (
-                              relatedEntries.map(e => (
-                                <span key={e.id} className="text-xs bg-gray-600 text-gray-300 px-2 py-0.5 rounded">
-                                  {e.title} — {e.score}
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-gray-400 w-14 flex-shrink-0">Poster:</span>
+                              <input
+                                type="text"
+                                value={editingRowData.poster_url || ''}
+                                onChange={(e) => setEditingRowData({ ...editingRowData, poster_url: e.target.value })}
+                                className="flex-1 px-2 py-0.5 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none text-xs"
+                                placeholder="https://image.tmdb.org/t/p/w500..."
+                              />
+                            </div>
+                            {editingRowData.series_name && (
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs text-blue-400 font-medium">
+                                  {`Related in "${editingRowData.series_name}":`}
                                 </span>
-                              ))
-                            ) : (
-                              <span className="text-xs text-gray-500">No other entries in this series yet</span>
+                                {relatedEntries.length > 0 ? (
+                                  relatedEntries.map(e => (
+                                    <span key={e.id} className="text-xs bg-gray-600 text-gray-300 px-2 py-0.5 rounded">
+                                      {e.title} — {e.score}
+                                    </span>
+                                  ))
+                                ) : (
+                                  <span className="text-xs text-gray-500">No other entries in this series yet</span>
+                                )}
+                              </div>
                             )}
                           </div>
                         </td>
