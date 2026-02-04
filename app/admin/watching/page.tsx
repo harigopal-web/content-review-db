@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus, Trash2, Upload, Check, X, Loader } from 'lucide-react';
+import { useState, useEffect, Fragment } from 'react';
+import { Plus, Trash2, Upload, Check, X, Loader, ArrowRight } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import type { CurrentlyWatching, Medium } from '@/lib/types';
+import type { CurrentlyWatching, Medium, ContentType } from '@/lib/types';
 
 interface ParsedItem {
   title: string;
@@ -12,6 +12,30 @@ interface ParsedItem {
   status: 'pending' | 'processing' | 'ready' | 'error';
   error?: string;
 }
+
+const TV_TYPES: ContentType[] = [
+  'Documentary/True Crime',
+  'Sports',
+  'Drama TV',
+  'Comedy TV',
+  'Comedy Specials',
+  'Reality Competition',
+  'Reality Dating',
+  'Comic Book Stuff',
+  'Home Improvement',
+];
+
+const MOVIE_TYPES: ContentType[] = [
+  'Comic Book Stuff',
+  'Documentary/True Crime',
+  'Drama',
+  'Horror',
+  'Comedy',
+  'Thriller',
+  'Romance',
+  'Action',
+  'Family',
+];
 
 export default function AdminWatchingPage() {
   const [watching, setWatching] = useState<CurrentlyWatching[]>([]);
@@ -23,6 +47,13 @@ export default function AdminWatchingPage() {
   const [parsedItems, setParsedItems] = useState<ParsedItem[]>([]);
   const [processing, setProcessing] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [scoringItemId, setScoringItemId] = useState<string | null>(null);
+  const [scoringData, setScoringData] = useState({
+    score: 3.0,
+    type: '' as ContentType,
+    year: new Date().getFullYear(),
+    series_name: '',
+  });
 
   useEffect(() => {
     loadWatching();
@@ -58,6 +89,53 @@ export default function AdminWatchingPage() {
     } catch (error) {
       console.error('Error deleting:', error);
       alert('Failed to delete item');
+    }
+  };
+
+  const startScoring = (item: CurrentlyWatching) => {
+    setScoringItemId(item.id);
+    const types = item.medium === 'TV' ? TV_TYPES : item.medium === 'Movie' ? MOVIE_TYPES : TV_TYPES;
+    setScoringData({
+      score: 3.0,
+      type: types[0],
+      year: new Date().getFullYear(),
+      series_name: '',
+    });
+  };
+
+  const cancelScoring = () => {
+    setScoringItemId(null);
+  };
+
+  const handleScoreAndMove = async (item: CurrentlyWatching) => {
+    try {
+      const { error: insertError } = await (supabase.from('entries') as any).insert([{
+        title: item.title,
+        year: scoringData.year,
+        score: scoringData.score,
+        medium: item.medium,
+        type: scoringData.type,
+        poster_url: item.poster_url,
+        series_name: scoringData.series_name || null,
+        tags: [],
+        hall_of_fame: false,
+      }]);
+
+      if (insertError) throw insertError;
+
+      const { error: deleteError } = await supabase
+        .from('currently_watching')
+        .delete()
+        .eq('id', item.id);
+
+      if (deleteError) throw deleteError;
+
+      alert(`"${item.title}" scored and moved to entries!`);
+      setScoringItemId(null);
+      await loadWatching();
+    } catch (error) {
+      console.error('Error scoring and moving:', error);
+      alert('Failed to move item');
     }
   };
 
@@ -302,7 +380,8 @@ export default function AdminWatchingPage() {
                 </tr>
               ) : (
                 watching.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-700/50 transition-colors">
+                  <Fragment key={item.id}>
+                  <tr className="hover:bg-gray-700/50 transition-colors">
                     <td className="px-4 py-3 text-white">{item.title}</td>
                     <td className="px-4 py-3 text-gray-300">{item.medium}</td>
                     <td className="px-4 py-3">
@@ -314,16 +393,109 @@ export default function AdminWatchingPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {scoringItemId === item.id ? (
+                          <button
+                            onClick={cancelScoring}
+                            className="p-2 bg-gray-600 hover:bg-gray-500 text-white rounded transition-colors"
+                            title="Cancel"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => startScoring(item)}
+                              className="p-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
+                              title="Score & Move"
+                            >
+                              <ArrowRight className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(item.id)}
+                              className="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
+                  {scoringItemId === item.id && (
+                    <tr className="bg-gray-700/50">
+                      <td colSpan={4} className="px-4 py-4">
+                        <div className="space-y-3">
+                          <p className="text-sm font-semibold text-green-400">
+                            Score & Move: {item.title}
+                          </p>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div>
+                              <label className="block text-xs text-gray-400 mb-1">Score (0–5)</label>
+                              <input
+                                type="number"
+                                min="0"
+                                max="5"
+                                step="0.5"
+                                value={scoringData.score}
+                                onChange={(e) => setScoringData({ ...scoringData, score: parseFloat(e.target.value) })}
+                                className="w-full px-2 py-1 bg-gray-600 text-white rounded border border-gray-500 focus:border-green-500 focus:outline-none"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-400 mb-1">Type</label>
+                              <select
+                                value={scoringData.type}
+                                onChange={(e) => setScoringData({ ...scoringData, type: e.target.value as ContentType })}
+                                className="w-full px-2 py-1 bg-gray-600 text-white rounded border border-gray-500 focus:border-green-500 focus:outline-none text-sm"
+                              >
+                                {(item.medium === 'TV' ? TV_TYPES : item.medium === 'Movie' ? MOVIE_TYPES : [...TV_TYPES, ...MOVIE_TYPES]).map((type) => (
+                                  <option key={type} value={type}>{type}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-400 mb-1">Year</label>
+                              <input
+                                type="number"
+                                min="2020"
+                                max="2026"
+                                value={scoringData.year}
+                                onChange={(e) => setScoringData({ ...scoringData, year: parseInt(e.target.value) })}
+                                className="w-full px-2 py-1 bg-gray-600 text-white rounded border border-gray-500 focus:border-green-500 focus:outline-none"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-400 mb-1">Series Name</label>
+                              <input
+                                type="text"
+                                value={scoringData.series_name}
+                                onChange={(e) => setScoringData({ ...scoringData, series_name: e.target.value })}
+                                className="w-full px-2 py-1 bg-gray-600 text-white rounded border border-gray-500 focus:border-green-500 focus:outline-none"
+                                placeholder="e.g. The Bear"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex gap-2 pt-1">
+                            <button
+                              onClick={() => handleScoreAndMove(item)}
+                              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm transition-colors"
+                            >
+                              <ArrowRight className="w-4 h-4" />
+                              Move to Entries
+                            </button>
+                            <button
+                              onClick={cancelScoring}
+                              className="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded text-sm transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  </Fragment>
                 ))
               )}
             </tbody>

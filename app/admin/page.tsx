@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { Plus, Edit, Trash2, Award, Search } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Entry, Medium, ContentType } from '@/lib/types';
@@ -51,6 +51,7 @@ export default function AdminPage() {
     tags: [] as string[],
     hall_of_fame: false,
     poster_url: '',
+    series_name: '',
   });
   const [tagInput, setTagInput] = useState('');
 
@@ -124,6 +125,7 @@ export default function AdminPage() {
       tags: entry.tags || [],
       hall_of_fame: entry.hall_of_fame || false,
       poster_url: entry.poster_url || '',
+      series_name: entry.series_name || '',
     });
     setShowForm(true);
   };
@@ -165,6 +167,7 @@ export default function AdminPage() {
       medium: entry.medium || 'Movie',
       type: entry.type || 'Movies',
       tags: entry.tags || [],
+      series_name: entry.series_name || '',
     });
   };
 
@@ -200,6 +203,7 @@ export default function AdminPage() {
       tags: [],
       hall_of_fame: false,
       poster_url: '',
+      series_name: '',
     });
     setTagInput('');
     setEditingEntry(null);
@@ -332,6 +336,19 @@ export default function AdminPage() {
                   placeholder="https://..."
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Series Name (optional)
+                </label>
+                <input
+                  type="text"
+                  value={formData.series_name}
+                  onChange={(e) => setFormData({ ...formData, series_name: e.target.value })}
+                  className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="e.g. The Bear"
+                />
+              </div>
             </div>
 
             <div>
@@ -454,23 +471,41 @@ export default function AdminPage() {
               ) : (
                 filteredEntries.map((entry) => {
                   const isEditing = editingRowId === entry.id;
+                  const relatedEntries = isEditing && editingRowData.series_name
+                    ? entries.filter(e => e.series_name && e.series_name === editingRowData.series_name && e.id !== entry.id)
+                    : [];
 
                   return (
-                    <tr key={entry.id} className="hover:bg-gray-700/50 transition-colors">
+                    <Fragment key={entry.id}>
+                    <tr className="hover:bg-gray-700/50 transition-colors">
                       <td className="px-4 py-3 text-white">
                         {isEditing ? (
-                          <input
-                            type="text"
-                            value={editingRowData.title || ''}
-                            onChange={(e) => setEditingRowData({ ...editingRowData, title: e.target.value })}
-                            className="w-full px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
-                          />
+                          <div className="space-y-1.5">
+                            <input
+                              type="text"
+                              value={editingRowData.title || ''}
+                              onChange={(e) => setEditingRowData({ ...editingRowData, title: e.target.value })}
+                              className="w-full px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+                            />
+                            <input
+                              type="text"
+                              value={editingRowData.series_name || ''}
+                              onChange={(e) => setEditingRowData({ ...editingRowData, series_name: e.target.value })}
+                              className="w-full px-2 py-1 bg-gray-700 text-gray-300 rounded border border-gray-600 focus:border-blue-500 focus:outline-none text-xs"
+                              placeholder="Series name"
+                            />
+                          </div>
                         ) : (
-                          <div className="flex items-center gap-2">
-                            {entry.hall_of_fame && (
-                              <Award className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+                          <div>
+                            <div className="flex items-center gap-2">
+                              {entry.hall_of_fame && (
+                                <Award className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+                              )}
+                              <span className="line-clamp-1">{entry.title}</span>
+                            </div>
+                            {entry.series_name && (
+                              <span className="text-xs text-blue-400">Series: {entry.series_name}</span>
                             )}
-                            <span className="line-clamp-1">{entry.title}</span>
                           </div>
                         )}
                       </td>
@@ -598,6 +633,27 @@ export default function AdminPage() {
                         )}
                       </td>
                     </tr>
+                    {isEditing && editingRowData.series_name && (
+                      <tr className="bg-gray-700/30">
+                        <td colSpan={7} className="px-4 py-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs text-blue-400 font-medium">
+                              {`Related in "${editingRowData.series_name}":`}
+                            </span>
+                            {relatedEntries.length > 0 ? (
+                              relatedEntries.map(e => (
+                                <span key={e.id} className="text-xs bg-gray-600 text-gray-300 px-2 py-0.5 rounded">
+                                  {e.title} — {e.score}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-xs text-gray-500">No other entries in this series yet</span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    </Fragment>
                   );
                 })
               )}

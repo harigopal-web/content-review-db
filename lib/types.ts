@@ -32,6 +32,7 @@ export interface Entry {
   updated_at?: string;
   poster_url?: string | null;
   notes?: string | null;
+  series_name?: string | null;
 }
 
 export interface Vote {
