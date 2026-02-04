@@ -5,6 +5,7 @@ import { ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import type { Medium, ContentType } from '@/lib/types';
+import { SCORE_TAGS } from '@/lib/tags';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +57,9 @@ export default function QuizPage() {
 
       const tags = new Set<string>();
       data?.forEach((entry: any) => {
-        entry.tags?.forEach((tag: string) => tags.add(tag));
+        entry.tags?.forEach((tag: string) => {
+          if (!SCORE_TAGS.includes(tag)) tags.add(tag);
+        });
       });
       setAllTags(Array.from(tags).sort());
     } catch (error) {

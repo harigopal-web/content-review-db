@@ -7,6 +7,7 @@ import Navigation from '@/components/Navigation';
 import EntryCard from '@/components/EntryCard';
 import { supabase } from '@/lib/supabase';
 import type { Entry, Medium, ContentType } from '@/lib/types';
+import { SCORE_TAGS } from '@/lib/tags';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,7 +103,9 @@ function BrowseContent() {
       // Extract all unique tags
       const tags = new Set<string>();
       (data as any)?.forEach((entry: any) => {
-        entry.tags?.forEach((tag: string) => tags.add(tag));
+        entry.tags?.forEach((tag: string) => {
+          if (!SCORE_TAGS.includes(tag)) tags.add(tag);
+        });
       });
       setAllTags(Array.from(tags).sort());
     } catch (error) {

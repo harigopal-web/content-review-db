@@ -166,7 +166,7 @@ function generateTags(tmdbResult, title) {
   });
 
   // Ensure at least 3 tags
-  const genericTags = ['entertaining', 'must-watch', 'recommended'];
+  const genericTags = ['engaging', 'compelling', 'worth-watching'];
   let i = 0;
   while (tags.size < 3 && i < genericTags.length) {
     tags.add(genericTags[i]);

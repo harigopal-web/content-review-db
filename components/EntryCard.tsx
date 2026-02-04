@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { Star, Film } from 'lucide-react';
 import type { Entry } from '@/lib/types';
+import { getDisplayTags } from '@/lib/tags';
 import VotingInterface from './VotingInterface';
 
 interface EntryCardProps {
@@ -11,6 +12,8 @@ interface EntryCardProps {
 }
 
 export default function EntryCard({ entry, showVoting = true }: EntryCardProps) {
+  const displayTags = getDisplayTags(entry.tags, entry.score);
+
   return (
     <div className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-all border border-border hover:border-brown">
       {entry.poster_url ? (
@@ -54,14 +57,14 @@ export default function EntryCard({ entry, showVoting = true }: EntryCardProps) 
           </span>
         </div>
 
-        {entry.tags && entry.tags.length > 0 && (
+        {displayTags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
-            {entry.tags.slice(0, 3).map((tag, index) => (
+            {displayTags.slice(0, 3).map((tag, index) => (
               <span
                 key={index}
                 className="text-xs text-text-light"
               >
-                {tag}{index < Math.min(entry.tags!.length, 3) - 1 ? ',' : ''}
+                {tag}{index < Math.min(displayTags.length, 3) - 1 ? ',' : ''}
               </span>
             ))}
           </div>

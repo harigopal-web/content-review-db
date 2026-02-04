@@ -192,7 +192,7 @@ export function generateTags(tmdbResult: TMDBResult, title: string): string[] {
   });
 
   // Ensure we have at least 4 tags
-  const genericTags = ['entertaining', 'must-watch', 'binge-worthy', 'feel-good'];
+  const genericTags = ['binge-worthy', 'feel-good', 'engaging', 'compelling'];
   let i = 0;
   while (tags.size < 4 && i < genericTags.length) {
     tags.add(genericTags[i]);

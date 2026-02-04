@@ -4,6 +4,7 @@ import { useState, useEffect, Fragment } from 'react';
 import { Plus, Edit, Trash2, Award, Search } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Entry, Medium, ContentType } from '@/lib/types';
+import { filterScoreTags, getDisplayTags } from '@/lib/tags';
 
 const TV_TYPES: ContentType[] = [
   'Documentary/True Crime',
@@ -31,6 +32,12 @@ const MOVIE_TYPES: ContentType[] = [
 
 const ALL_TYPES = [...new Set([...TV_TYPES, ...MOVIE_TYPES])].sort();
 
+function validateType(type: ContentType | null, medium: Medium | null): ContentType {
+  const validTypes = medium === 'TV' ? TV_TYPES : medium === 'Movie' ? MOVIE_TYPES : ALL_TYPES;
+  if (type && validTypes.includes(type)) return type;
+  return validTypes[0];
+}
+
 export default function AdminPage() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<Entry[]>([]);
@@ -47,7 +54,7 @@ export default function AdminPage() {
     year: new Date().getFullYear(),
     score: 3.0,
     medium: 'Movie' as Medium,
-    type: 'Movies' as ContentType,
+    type: 'Drama' as ContentType,
     tags: [] as string[],
     hall_of_fame: false,
     poster_url: '',
@@ -92,17 +99,18 @@ export default function AdminPage() {
     e.preventDefault();
 
     try {
+      const submitData = { ...formData, tags: filterScoreTags(formData.tags) };
       if (editingEntry) {
         // Update existing entry
         const { error } = await (supabase
           .from('entries') as any)
-          .update(formData)
+          .update(submitData)
           .eq('id', editingEntry.id);
 
         if (error) throw error;
       } else {
         // Create new entry
-        const { error } = await (supabase.from('entries') as any).insert([formData]);
+        const { error } = await (supabase.from('entries') as any).insert([submitData]);
 
         if (error) throw error;
       }
@@ -122,8 +130,8 @@ export default function AdminPage() {
       year: entry.year,
       score: entry.score,
       medium: entry.medium || 'Movie',
-      type: entry.type || 'Movies',
-      tags: entry.tags || [],
+      type: validateType(entry.type, entry.medium),
+      tags: filterScoreTags(entry.tags),
       hall_of_fame: entry.hall_of_fame || false,
       poster_url: entry.poster_url || '',
       series_name: entry.series_name || '',
@@ -166,8 +174,8 @@ export default function AdminPage() {
       year: entry.year,
       score: entry.score,
       medium: entry.medium || 'Movie',
-      type: entry.type || 'Movies',
-      tags: entry.tags || [],
+      type: validateType(entry.type, entry.medium),
+      tags: filterScoreTags(entry.tags),
       series_name: entry.series_name || '',
       poster_url: entry.poster_url || '',
     });
@@ -181,9 +189,10 @@ export default function AdminPage() {
 
   const saveInlineEdit = async (id: string) => {
     try {
+      const dataToSave = { ...editingRowData, tags: filterScoreTags(editingRowData.tags) };
       const { error } = await (supabase
         .from('entries') as any)
-        .update(editingRowData)
+        .update(dataToSave)
         .eq('id', id);
 
       if (error) throw error;
@@ -203,7 +212,7 @@ export default function AdminPage() {
       year: new Date().getFullYear(),
       score: 3.0,
       medium: 'Movie',
-      type: 'Movies',
+      type: 'Drama',
       tags: [],
       hall_of_fame: false,
       poster_url: '',
@@ -301,7 +310,10 @@ export default function AdminPage() {
                 </label>
                 <select
                   value={formData.medium}
-                  onChange={(e) => setFormData({ ...formData, medium: e.target.value as Medium })}
+                  onChange={(e) => {
+                    const newMedium = e.target.value as Medium;
+                    setFormData({ ...formData, medium: newMedium, type: validateType(formData.type, newMedium) });
+                  }}
                   className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   required
                 >
@@ -475,6 +487,7 @@ export default function AdminPage() {
               ) : (
                 filteredEntries.map((entry) => {
                   const isEditing = editingRowId === entry.id;
+                  const displayTags = getDisplayTags(entry.tags, entry.score);
                   const relatedEntries = isEditing && editingRowData.series_name
                     ? entries.filter(e => e.series_name && e.series_name === editingRowData.series_name && e.id !== entry.id)
                     : [];
@@ -546,7 +559,10 @@ export default function AdminPage() {
                         {isEditing ? (
                           <select
                             value={editingRowData.medium || 'Movie'}
-                            onChange={(e) => setEditingRowData({ ...editingRowData, medium: e.target.value as Medium })}
+                            onChange={(e) => {
+                            const newMedium = e.target.value as Medium;
+                            setEditingRowData({ ...editingRowData, medium: newMedium, type: validateType(editingRowData.type || null, newMedium) });
+                          }}
                             className="w-full px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
                           >
                             <option value="Movie">Movie</option>
@@ -577,7 +593,7 @@ export default function AdminPage() {
                         {isEditing ? (
                           <div className="space-y-1.5">
                             <div className="flex flex-wrap gap-1">
-                              {(editingRowData.tags || []).map((tag, i) => (
+                              {filterScoreTags(editingRowData.tags).map((tag, i) => (
                                 <span key={i} className="inline-flex items-center gap-1 text-xs bg-gray-600 text-gray-300 px-2 py-0.5 rounded">
                                   {tag}
                                   <button
@@ -607,17 +623,21 @@ export default function AdminPage() {
                           </div>
                         ) : (
                           <div className="flex flex-wrap gap-1">
-                            {entry.tags?.slice(0, 3).map((tag, i) => (
+                            {displayTags.slice(0, 3).map((tag, i) => (
                               <span
                                 key={i}
-                                className="text-xs bg-gray-600 text-gray-300 px-2 py-1 rounded"
+                                className={`text-xs px-2 py-1 rounded ${
+                                  ['must-watch', 'recommended', 'entertaining'].includes(tag)
+                                    ? 'bg-blue-600/30 text-blue-300'
+                                    : 'bg-gray-600 text-gray-300'
+                                }`}
                               >
                                 {tag}
                               </span>
                             ))}
-                            {entry.tags && entry.tags.length > 3 && (
+                            {displayTags.length > 3 && (
                               <span className="text-xs text-gray-400">
-                                +{entry.tags.length - 3}
+                                +{displayTags.length - 3}
                               </span>
                             )}
                           </div>

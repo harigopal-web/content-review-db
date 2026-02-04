@@ -7,6 +7,7 @@ import { ArrowRight, Star, Film } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/types';
+import { getDisplayTags } from '@/lib/tags';
 
 export default function HomePage() {
   const [featuredEntries, setFeaturedEntries] = useState<Entry[]>([]);
@@ -178,9 +179,9 @@ export default function HomePage() {
                   <span className="text-sm text-text-light">•</span>
                   <span className="text-sm text-text-medium">{entry.year}</span>
                 </div>
-                {entry.tags && entry.tags.length > 0 && (
+                {getDisplayTags(entry.tags, entry.score).length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {entry.tags.slice(0, 2).map((tag, idx) => (
+                    {getDisplayTags(entry.tags, entry.score).slice(0, 2).map((tag, idx) => (
                       <span
                         key={idx}
                         className="text-xs px-3 py-1 bg-white rounded-full text-text-medium border border-border"
