@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Fragment } from 'react';
-import { Plus, Edit, Trash2, Award, Search, Check } from 'lucide-react';
+import { Plus, Edit, Trash2, Award, Search } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Entry, Medium, ContentType } from '@/lib/types';
 import { filterScoreTags, getDisplayTags } from '@/lib/tags';
@@ -646,9 +646,9 @@ export default function AdminPage() {
                       </td>
                       <td className="px-4 py-3">
                         {(isEditing ? editingRowData.poster_url : entry.poster_url) ? (
-                          <Check className="w-4 h-4 text-green-500" />
+                          <span className="text-green-400 text-sm">✓ Yes</span>
                         ) : (
-                          <span className="text-gray-600 text-sm">—</span>
+                          <span className="text-gray-500 text-sm">No poster</span>
                         )}
                       </td>
                       <td className="px-4 py-3">
