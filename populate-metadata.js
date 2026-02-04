@@ -26,6 +26,9 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
+// Score-derived tags — never store these; they are computed on the fly
+const SCORE_TAGS = ['must-watch', 'recommended', 'entertaining'];
+
 function cleanTitleForSearch(title) {
   // Remove season indicators like "s2", "S3", "season 2", etc.
   let cleaned = title
@@ -120,7 +123,7 @@ function determineType(tmdbResult, title) {
     }
   }
 
-  if (medium === 'Movie') return 'Movies';
+  if (medium === 'Movie') return 'Drama';
   return 'Drama TV';
 }
 
@@ -222,13 +225,13 @@ async function populateMetadata() {
         const tags = generateTags(tmdbResult, entry.title);
         const poster_url = getPosterUrl(tmdbResult);
 
-        // Update the entry
+        // Update the entry (strip any score-derived tags before writing)
         const { error: updateError } = await supabase
           .from('entries')
           .update({
             medium,
             type,
-            tags,
+            tags: tags.filter(t => !SCORE_TAGS.includes(t)),
             poster_url,
           })
           .eq('id', entry.id);

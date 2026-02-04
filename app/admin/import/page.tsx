@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { Upload, Check, X, Edit, Loader } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { ImportEntry, Medium, ContentType } from '@/lib/types';
+import { filterScoreTags } from '@/lib/tags';
 
-const CONTENT_TYPES: ContentType[] = [
-  'Movies',
+const TV_TYPES: ContentType[] = [
   'Documentary/True Crime',
   'Sports',
   'Drama TV',
@@ -17,6 +17,20 @@ const CONTENT_TYPES: ContentType[] = [
   'Comic Book Stuff',
   'Home Improvement',
 ];
+
+const MOVIE_TYPES: ContentType[] = [
+  'Comic Book Stuff',
+  'Documentary/True Crime',
+  'Drama',
+  'Horror',
+  'Comedy',
+  'Thriller',
+  'Romance',
+  'Action',
+  'Family',
+];
+
+const ALL_TYPES: ContentType[] = [...new Set([...TV_TYPES, ...MOVIE_TYPES])].sort() as ContentType[];
 
 interface ParsedEntry extends ImportEntry {
   status: 'pending' | 'processing' | 'ready' | 'error';
@@ -142,7 +156,7 @@ export default function BulkImportPage() {
         score: entry.score,
         medium: entry.medium!,
         type: entry.type!,
-        tags: entry.tags || [],
+        tags: filterScoreTags(entry.tags),
         poster_url: entry.poster_url || null,
         hall_of_fame: false,
       }));
@@ -296,11 +310,11 @@ export default function BulkImportPage() {
                           <option value="TV">TV</option>
                         </select>
                         <select
-                          value={entry.type || 'Movies'}
+                          value={entry.type || (entry.medium === 'TV' ? TV_TYPES[0] : MOVIE_TYPES[0])}
                           onChange={e => handleEdit(index, 'type', e.target.value)}
                           className="px-3 py-2 bg-gray-700 text-white rounded border border-gray-600"
                         >
-                          {CONTENT_TYPES.map(type => (
+                          {(entry.medium === 'TV' ? TV_TYPES : entry.medium === 'Movie' ? MOVIE_TYPES : ALL_TYPES).map(type => (
                             <option key={type} value={type}>
                               {type}
                             </option>

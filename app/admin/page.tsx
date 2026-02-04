@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Fragment } from 'react';
-import { Plus, Edit, Trash2, Award, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Award, Search, Check } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Entry, Medium, ContentType } from '@/lib/types';
 import { filterScoreTags, getDisplayTags } from '@/lib/tags';
@@ -466,6 +466,7 @@ export default function AdminPage() {
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Medium</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Type</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Tags</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Poster</th>
                 <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">
                   Actions
                 </th>
@@ -474,13 +475,13 @@ export default function AdminPage() {
             <tbody className="divide-y divide-gray-700">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={8} className="px-4 py-8 text-center text-gray-400">
                     Loading...
                   </td>
                 </tr>
               ) : filteredEntries.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={8} className="px-4 py-8 text-center text-gray-400">
                     No entries found
                   </td>
                 </tr>
@@ -575,7 +576,7 @@ export default function AdminPage() {
                       <td className="px-4 py-3 text-gray-300 text-sm">
                         {isEditing ? (
                           <select
-                            value={editingRowData.type || 'Movies'}
+                            value={editingRowData.type || (editingRowData.medium === 'TV' ? TV_TYPES[0] : MOVIE_TYPES[0])}
                             onChange={(e) => setEditingRowData({ ...editingRowData, type: e.target.value as ContentType })}
                             className="w-full px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none text-xs"
                           >
@@ -644,6 +645,13 @@ export default function AdminPage() {
                         )}
                       </td>
                       <td className="px-4 py-3">
+                        {(isEditing ? editingRowData.poster_url : entry.poster_url) ? (
+                          <Check className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <span className="text-gray-600 text-sm">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
                         {isEditing ? (
                           <div className="flex items-center justify-center gap-2">
                             <button
@@ -692,7 +700,7 @@ export default function AdminPage() {
                     </tr>
                     {isEditing && (
                       <tr className="bg-gray-700/30">
-                        <td colSpan={7} className="px-4 py-2">
+                        <td colSpan={8} className="px-4 py-2">
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-gray-400 w-14 flex-shrink-0">Poster:</span>

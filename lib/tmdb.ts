@@ -1,30 +1,18 @@
 import type { TMDBResult, Medium, ContentType } from './types';
+import { filterScoreTags } from './tags';
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
-// TMDB genre ID to our content type mapping
+// TMDB genre ID → content-type reference (determineType uses inline logic; kept for docs)
 const GENRE_TO_TYPE_MAP: Record<number, ContentType> = {
-  // Documentary
-  99: 'Documentary/True Crime',
-
-  // Comedy
-  35: 'Comedy TV',
-
-  // Drama
-  18: 'Drama TV',
-
-  // Sports (not a standard TMDB genre, handled separately)
-
-  // Reality (not standard TMDB genres, handled by keywords/search)
-
-  // Action/Adventure/Superhero - Comic Book Stuff
-  28: 'Movies', // Action
-  12: 'Movies', // Adventure
-  14: 'Movies', // Fantasy
-  878: 'Movies', // Science Fiction
-
-  // Home (not standard, handled separately)
+  99:  'Documentary/True Crime',
+  35:  'Comedy TV',
+  18:  'Drama TV',
+  28:  'Action',        // Action
+  12:  'Action',        // Adventure
+  14:  'Drama',         // Fantasy
+  878: 'Thriller',      // Science Fiction
 };
 
 function cleanTitleForSearch(title: string): string {
@@ -130,7 +118,7 @@ export function determineType(tmdbResult: TMDBResult, title: string): ContentTyp
   }
 
   // Default based on medium
-  if (medium === 'Movie') return 'Movies';
+  if (medium === 'Movie') return 'Drama';
   return 'Drama TV'; // Default for TV
 }
 
@@ -216,7 +204,7 @@ export async function autoLookupEntry(title: string, score: number) {
       title,
       score,
       medium: 'Movie' as Medium,
-      type: 'Movies' as ContentType,
+      type: 'Drama' as ContentType,
       tags: ['unknown'],
       poster_url: null,
     };
@@ -227,7 +215,7 @@ export async function autoLookupEntry(title: string, score: number) {
     score,
     medium: determineMedium(tmdbResult),
     type: determineType(tmdbResult, title),
-    tags: generateTags(tmdbResult, title),
+    tags: filterScoreTags(generateTags(tmdbResult, title)),
     poster_url: getPosterUrl(tmdbResult),
   };
 }
