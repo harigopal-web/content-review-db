@@ -32,7 +32,7 @@ export default function HomePage() {
       const { data: featuredData } = await supabase
         .from('entries')
         .select('*')
-        .order('year', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(8);
 
       setFeaturedEntries(featuredData || []);
