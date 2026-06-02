@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Fragment } from 'react';
-import { Plus, Edit, Trash2, Award, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Award, Search, ChevronUp, ChevronDown } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Entry, Medium, ContentType } from '@/lib/types';
 import { filterScoreTags, getDisplayTags } from '@/lib/tags';
@@ -47,6 +47,10 @@ export default function AdminPage() {
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
   const [editingRowData, setEditingRowData] = useState<Partial<Entry>>({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterMedium, setFilterMedium] = useState<'All' | Medium>('All');
+  const [filterType, setFilterType] = useState<string>('All');
+  const [sortField, setSortField] = useState<'created_at' | 'title' | 'score' | 'year'>('created_at');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -68,15 +72,56 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
+    let result = [...entries];
+
+    // Search
     if (searchQuery.trim()) {
-      const filtered = entries.filter((entry) =>
-        entry.title.toLowerCase().includes(searchQuery.toLowerCase())
+      result = result.filter((e) =>
+        e.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      setFilteredEntries(filtered);
-    } else {
-      setFilteredEntries(entries);
     }
-  }, [searchQuery, entries]);
+
+    // Medium filter
+    if (filterMedium !== 'All') {
+      result = result.filter((e) => e.medium === filterMedium);
+    }
+
+    // Type filter
+    if (filterType !== 'All') {
+      result = result.filter((e) => e.type === filterType);
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      let valA: any = a[sortField];
+      let valB: any = b[sortField];
+      if (typeof valA === 'string') valA = valA.toLowerCase();
+      if (typeof valB === 'string') valB = valB.toLowerCase();
+      if (valA < valB) return sortDir === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    setFilteredEntries(result);
+  }, [searchQuery, filterMedium, filterType, sortField, sortDir, entries]);
+
+  const toggleSort = (field: typeof sortField) => {
+    if (sortField === field) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir(field === 'title' ? 'asc' : 'desc');
+    }
+  };
+
+  const SortIcon = ({ field }: { field: typeof sortField }) => {
+    if (sortField !== field) return null;
+    return sortDir === 'asc'
+      ? <ChevronUp className="w-3 h-3 inline ml-1" />
+      : <ChevronDown className="w-3 h-3 inline ml-1" />;
+  };
+
+  const availableTypes = filterMedium === 'TV' ? TV_TYPES : filterMedium === 'Movie' ? MOVIE_TYPES : ALL_TYPES;
 
   const loadEntries = async () => {
     try {
@@ -440,8 +485,9 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Search */}
-      <div className="mb-6">
+      {/* Filters */}
+      <div className="mb-6 space-y-3">
+        {/* Search */}
         <div className="relative">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
@@ -452,6 +498,66 @@ export default function AdminPage() {
             className="w-full pl-12 pr-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
         </div>
+
+        {/* Filter + Sort Row */}
+        <div className="flex flex-wrap gap-3 items-center">
+          {/* Medium filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-gray-400 text-sm">Medium:</span>
+            {(['All', 'Movie', 'TV'] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => { setFilterMedium(m); setFilterType('All'); }}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  filterMedium === m
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+
+          {/* Type filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-gray-400 text-sm">Type:</span>
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="px-3 py-1.5 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none text-sm"
+            >
+              <option value="All">All Types</option>
+              {availableTypes.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Sort */}
+          <div className="flex items-center gap-2 ml-auto">
+            <span className="text-gray-400 text-sm">Sort:</span>
+            {([
+              { field: 'created_at', label: 'Date Added' },
+              { field: 'title', label: 'Name' },
+              { field: 'score', label: 'Score' },
+              { field: 'year', label: 'Year' },
+            ] as const).map(({ field, label }) => (
+              <button
+                key={field}
+                onClick={() => toggleSort(field)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center ${
+                  sortField === field
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                {label}
+                <SortIcon field={field} />
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Entries List */}
@@ -460,16 +566,14 @@ export default function AdminPage() {
           <table className="w-full">
             <thead className="bg-gray-700">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Title</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Year</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Score</th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 cursor-pointer hover:text-white select-none" onClick={() => toggleSort('title')}>Title <SortIcon field="title" /></th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 cursor-pointer hover:text-white select-none" onClick={() => toggleSort('year')}>Year <SortIcon field="year" /></th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 cursor-pointer hover:text-white select-none" onClick={() => toggleSort('score')}>Score <SortIcon field="score" /></th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Medium</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Type</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Tags</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Poster</th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">
-                  Actions
-                </th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">

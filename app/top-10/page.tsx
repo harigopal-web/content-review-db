@@ -62,6 +62,12 @@ export default function Top10Page() {
           <p className="text-xl text-text-medium">
             The absolute favorites — the cream of the crop
           </p>
+          <p className="mt-4 text-sm text-text-light max-w-2xl mx-auto">
+            All ratings reflect content watched by the Gopals since 2020. For a comprehensive database of all films and TV, visit{' '}
+            <a href="https://letterboxd.com" target="_blank" rel="noopener noreferrer" className="text-brown hover:underline">Letterboxd</a>,{' '}
+            <a href="https://www.imdb.com" target="_blank" rel="noopener noreferrer" className="text-brown hover:underline">IMDb</a>, or{' '}
+            <a href="https://www.rottentomatoes.com" target="_blank" rel="noopener noreferrer" className="text-brown hover:underline">Rotten Tomatoes</a>.
+          </p>
         </div>
 
         {/* Tabs */}
