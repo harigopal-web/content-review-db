@@ -42,12 +42,18 @@ export default function FiveStarsPage() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Star className="w-12 h-12 fill-brown text-brown" />
             <h1 className="font-serif text-5xl font-bold text-text-dark">
-              5-Star Shows
+              5-Star Content
             </h1>
             <Star className="w-12 h-12 fill-brown text-brown" />
           </div>
           <p className="text-xl text-text-medium">
-            The absolute best of the best - shows and movies that earned a perfect score
+            The absolute best of the best — movies and shows that earned a perfect score
+          </p>
+          <p className="mt-4 text-sm text-text-light max-w-2xl mx-auto">
+            All ratings reflect content watched by the Gopals since 2020. For a comprehensive database of all films and TV, visit{' '}
+            <a href="https://letterboxd.com" target="_blank" rel="noopener noreferrer" className="text-brown hover:underline">Letterboxd</a>,{' '}
+            <a href="https://www.imdb.com" target="_blank" rel="noopener noreferrer" className="text-brown hover:underline">IMDb</a>, or{' '}
+            <a href="https://www.rottentomatoes.com" target="_blank" rel="noopener noreferrer" className="text-brown hover:underline">Rotten Tomatoes</a>.
           </p>
         </div>
 

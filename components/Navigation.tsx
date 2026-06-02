@@ -14,7 +14,7 @@ export default function Navigation() {
     { href: '/browse', label: 'Browse', icon: Search },
     { href: '/quiz', label: 'Quiz', icon: Sparkles },
     { href: '/watching', label: 'Currently Watching', icon: Eye },
-    { href: '/five-stars', label: '5-Star Shows', icon: Star },
+    { href: '/five-stars', label: '5-Star Content', icon: Star },
     { href: '/top-10', label: 'Top 10', icon: Trophy },
   ];
 
