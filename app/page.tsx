@@ -19,11 +19,12 @@ export default function HomePage() {
 
   const loadContent = async () => {
     try {
-      // Get top rated entries
+      // Get most recent 5-star entries
       const { data: topData } = await supabase
         .from('entries')
         .select('*')
-        .order('score', { ascending: false })
+        .eq('score', 5)
+        .order('created_at', { ascending: false })
         .limit(6);
 
       setTopRated(topData || []);
@@ -82,7 +83,7 @@ export default function HomePage() {
               <h2 className="font-serif text-4xl font-bold text-text-dark mb-2">
                 Top Rated
               </h2>
-              <p className="text-text-medium">Our highest-scoring content</p>
+              <p className="text-text-medium">Most recently awarded 5 stars</p>
             </div>
             <Link
               href="/top-10"

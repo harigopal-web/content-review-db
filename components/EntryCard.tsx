@@ -4,14 +4,11 @@ import Image from 'next/image';
 import { Star, Film } from 'lucide-react';
 import type { Entry } from '@/lib/types';
 import { getDisplayTags } from '@/lib/tags';
-import VotingInterface from './VotingInterface';
-
 interface EntryCardProps {
   entry: Entry;
-  showVoting?: boolean;
 }
 
-export default function EntryCard({ entry, showVoting = true }: EntryCardProps) {
+export default function EntryCard({ entry }: EntryCardProps) {
   const displayTags = getDisplayTags(entry.tags, entry.score);
 
   return (
@@ -70,7 +67,6 @@ export default function EntryCard({ entry, showVoting = true }: EntryCardProps) 
           </div>
         )}
 
-        {showVoting && <VotingInterface entryId={entry.id} />}
       </div>
     </div>
   );

@@ -1,246 +1,164 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState } from 'react';
 import { ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import type { Medium, ContentType } from '@/lib/types';
-import { SCORE_TAGS } from '@/lib/tags';
 
 export const dynamic = 'force-dynamic';
 
-const TV_TYPES: ContentType[] = [
-  'Documentary/True Crime',
-  'Sports',
-  'Drama TV',
-  'Comedy TV',
-  'Comedy Specials',
-  'Reality Competition',
-  'Reality Dating',
-  'Comic Book Stuff',
-  'Home Improvement',
-];
+interface QuizState {
+  medium: Medium | '';
+  contentType: ContentType | '';
+  minScore: number;
+  mostRecent: boolean;
+  tags: string[];
+}
 
-const MOVIE_TYPES: ContentType[] = [
-  'Comic Book Stuff',
-  'Documentary/True Crime',
-  'Drama',
-  'Horror',
-  'Comedy',
-  'Thriller',
-  'Romance',
-  'Action',
-  'Family',
+interface Question {
+  title: string;
+  subtitle: string;
+  options: {
+    label: string;
+    emoji: string;
+    apply: (state: QuizState) => Partial<QuizState>;
+  }[];
+}
+
+const questions: Question[] = [
+  {
+    title: "It's Friday night and you're settling in. What's the vibe?",
+    subtitle: "Pick what sounds most like you right now",
+    options: [
+      { label: "Light, fun, no stress", emoji: "😄", apply: (s) => ({ contentType: 'Comedy' as ContentType }) },
+      { label: "Edge-of-my-seat gripping", emoji: "😬", apply: (s) => ({ contentType: 'Thriller' as ContentType }) },
+      { label: "Something moving and emotional", emoji: "🥹", apply: (s) => ({ contentType: 'Drama' as ContentType }) },
+      { label: "Learn something real", emoji: "🧠", apply: (s) => ({ contentType: 'Documentary/True Crime' as ContentType }) },
+    ],
+  },
+  {
+    title: "You're watching with...",
+    subtitle: "Who's joining you tonight?",
+    options: [
+      { label: "Just me, my call", emoji: "🛋️", apply: () => ({}) },
+      { label: "My partner", emoji: "💑", apply: () => ({ tags: ['romantic'] }) },
+      { label: "A group of friends", emoji: "👫", apply: () => ({}) },
+      { label: "Family (all ages)", emoji: "👨‍👩‍👧", apply: () => ({ contentType: 'Family' as ContentType }) },
+    ],
+  },
+  {
+    title: "Movie or TV series?",
+    subtitle: "How much of a commitment are you making?",
+    options: [
+      { label: "Movie — done in 2 hours", emoji: "🎬", apply: () => ({ medium: 'Movie' as Medium }) },
+      { label: "TV series — I want to binge", emoji: "📺", apply: () => ({ medium: 'TV' as Medium }) },
+      { label: "Either — surprise me", emoji: "🎲", apply: () => ({ medium: '' as '' }) },
+    ],
+  },
+  {
+    title: "When you're out with friends, you're usually...",
+    subtitle: "Pick the one that sounds most like you",
+    options: [
+      { label: "The one suggesting somewhere fun and low-key", emoji: "🍻", apply: () => ({ contentType: 'Comedy' as ContentType }) },
+      { label: "The one who loves a good intense debate after", emoji: "💬", apply: () => ({ contentType: 'Drama' as ContentType }) },
+      { label: "The one suggesting something wild and unexpected", emoji: "🎢", apply: () => ({ contentType: 'Action' as ContentType }) },
+      { label: "The one who did the research beforehand", emoji: "📋", apply: () => ({ contentType: 'Documentary/True Crime' as ContentType }) },
+    ],
+  },
+  {
+    title: "You just had a long, exhausting week. You want...",
+    subtitle: "Be honest — what actually sounds good?",
+    options: [
+      { label: "Something that makes me laugh and unwind", emoji: "😂", apply: () => ({ contentType: 'Comedy' as ContentType }) },
+      { label: "Something intense enough to make me forget everything", emoji: "🔥", apply: () => ({ contentType: 'Thriller' as ContentType }) },
+      { label: "A good drama I can get emotionally lost in", emoji: "😢", apply: () => ({ contentType: 'Drama' as ContentType }) },
+      { label: "Reality TV — pure guilty pleasure", emoji: "🌹", apply: () => ({ contentType: 'Reality Dating' as ContentType }) },
+    ],
+  },
+  {
+    title: "If your life were a show, it would be...",
+    subtitle: "Pick your spirit genre",
+    options: [
+      { label: "A smart, fast-paced drama series", emoji: "🎭", apply: () => ({ contentType: 'Drama TV' as ContentType }) },
+      { label: "An action-packed blockbuster", emoji: "💥", apply: () => ({ contentType: 'Action' as ContentType }) },
+      { label: "A cult-classic comedy", emoji: "🤡", apply: () => ({ contentType: 'Comedy TV' as ContentType }) },
+      { label: "A compelling true-crime doc", emoji: "🔍", apply: () => ({ contentType: 'Documentary/True Crime' as ContentType }) },
+    ],
+  },
+  {
+    title: "Scrolling social media, you always stop for...",
+    subtitle: "What content actually gets you?",
+    options: [
+      { label: "Sports highlights and big moments", emoji: "🏆", apply: () => ({ contentType: 'Sports' as ContentType }) },
+      { label: "True crime or wild news stories", emoji: "🚨", apply: () => ({ contentType: 'Documentary/True Crime' as ContentType }) },
+      { label: "Comedy clips and memes", emoji: "😂", apply: () => ({ contentType: 'Comedy' as ContentType }) },
+      { label: "Movie trailers and pop culture", emoji: "🎥", apply: () => ({ contentType: 'Comic Book Stuff' as ContentType }) },
+    ],
+  },
+  {
+    title: "How picky are you feeling tonight?",
+    subtitle: "Set the quality bar",
+    options: [
+      { label: "Only the absolute best", emoji: "⭐", apply: () => ({ minScore: 5 }) },
+      { label: "High quality please", emoji: "✨", apply: () => ({ minScore: 4.5 }) },
+      { label: "Good is good enough", emoji: "👍", apply: () => ({ minScore: 4 }) },
+      { label: "Show me everything", emoji: "🎯", apply: () => ({ minScore: 0 }) },
+    ],
+  },
+  {
+    title: "Does it need to be something new?",
+    subtitle: "How recent are we talking?",
+    options: [
+      { label: "Yes — 2024 or 2025 only", emoji: "🆕", apply: () => ({ mostRecent: true }) },
+      { label: "No — classics are totally fine", emoji: "🕰️", apply: () => ({ mostRecent: false }) },
+    ],
+  },
+  {
+    title: "Last one — are you feeling adventurous?",
+    subtitle: "How much do you want to be surprised?",
+    options: [
+      { label: "Totally — show me something unexpected", emoji: "🚀", apply: () => ({ contentType: '' as '' }) },
+      { label: "A little — stay in my wheelhouse", emoji: "🧭", apply: () => ({}) },
+      { label: "Not really — I know what I like", emoji: "✅", apply: () => ({}) },
+    ],
+  },
 ];
 
 export default function QuizPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [allTags, setAllTags] = useState<string[]>([]);
+  const [state, setState] = useState<QuizState>({
+    medium: '',
+    contentType: '',
+    minScore: 0,
+    mostRecent: false,
+    tags: [],
+  });
 
-  // Quiz answers
-  const [medium, setMedium] = useState<Medium | ''>('');
-  const [contentType, setContentType] = useState<ContentType | ''>('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [minScore, setMinScore] = useState<number>(0);
-  const [mostRecent, setMostRecent] = useState(false);
+  const applyAnswer = (apply: (s: QuizState) => Partial<QuizState>) => {
+    const updates = apply(state);
+    const next = { ...state, ...updates };
+    setState(next);
 
-  useEffect(() => {
-    loadTags();
-  }, []);
-
-  const loadTags = async () => {
-    try {
-      const { supabase } = await import('@/lib/supabase');
-
-      const { data } = await supabase.from('entries').select('tags');
-
-      const tags = new Set<string>();
-      data?.forEach((entry: any) => {
-        entry.tags?.forEach((tag: string) => {
-          if (!SCORE_TAGS.includes(tag)) tags.add(tag);
-        });
-      });
-      setAllTags(Array.from(tags).sort());
-    } catch (error) {
-      console.error('Error loading tags:', error);
+    if (step < questions.length - 1) {
+      setStep(step + 1);
+    } else {
+      finish(next);
     }
   };
 
-  const toggleTag = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
-  };
-
-  const handleFinish = () => {
-    // Build query params
+  const finish = (finalState: QuizState) => {
     const params = new URLSearchParams();
-    if (medium) params.set('medium', medium);
-    if (contentType) params.set('type', contentType);
-    if (selectedTags.length > 0) params.set('tags', selectedTags.join(','));
-    if (minScore > 0) params.set('minScore', minScore.toString());
-    if (mostRecent) params.set('mostRecent', 'true');
-
+    if (finalState.medium) params.set('medium', finalState.medium);
+    if (finalState.contentType) params.set('type', finalState.contentType);
+    if (finalState.tags.length > 0) params.set('tags', finalState.tags.join(','));
+    if (finalState.minScore > 0) params.set('minScore', finalState.minScore.toString());
+    if (finalState.mostRecent) params.set('mostRecent', 'true');
     router.push(`/browse?${params.toString()}`);
   };
 
-  const questions = [
-    {
-      title: 'What are you in the mood for?',
-      subtitle: 'Choose a medium',
-      content: (
-        <div className="flex flex-col gap-4">
-          <button
-            onClick={() => { setMedium(''); setStep(step + 1); }}
-            className="px-8 py-6 border-2 border-brown text-brown hover:bg-brown hover:text-white rounded-full text-xl transition-all font-medium"
-          >
-            Either - Surprise Me!
-          </button>
-          <button
-            onClick={() => { setMedium('Movie'); setStep(step + 1); }}
-            className="px-8 py-6 bg-brown hover:bg-brown-dark text-white rounded-full text-xl transition-all font-medium shadow-md"
-          >
-            Movies
-          </button>
-          <button
-            onClick={() => { setMedium('TV'); setStep(step + 1); }}
-            className="px-8 py-6 bg-brown hover:bg-brown-dark text-white rounded-full text-xl transition-all font-medium shadow-md"
-          >
-            TV Shows
-          </button>
-        </div>
-      ),
-    },
-    {
-      title: 'What type of content?',
-      subtitle: 'Optional - skip if you want variety',
-      content: (
-        <div className="space-y-4">
-          <select
-            value={contentType}
-            onChange={(e) => setContentType(e.target.value as ContentType | '')}
-            className="w-full px-6 py-4 rounded-lg bg-cream text-text-dark border-2 border-border focus:ring-2 focus:ring-brown focus:border-brown text-lg"
-          >
-            <option value="">Any Type</option>
-            {(medium === 'TV' ? TV_TYPES : medium === 'Movie' ? MOVIE_TYPES : [...TV_TYPES, ...MOVIE_TYPES]).map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={() => setStep(step + 1)}
-            className="w-full px-6 py-4 bg-brown hover:bg-brown-dark text-white rounded-full transition-all flex items-center justify-center gap-2 text-lg font-medium shadow-md"
-          >
-            <span>Next</span>
-            <ArrowRight className="w-5 h-5" />
-          </button>
-        </div>
-      ),
-    },
-    {
-      title: 'How good should it be?',
-      subtitle: 'Set a minimum rating',
-      content: (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {[
-              { value: 0, label: 'Any Rating' },
-              { value: 3, label: '3+ Stars' },
-              { value: 3.5, label: '3.5+ Stars' },
-              { value: 4, label: '4+ Stars' },
-              { value: 4.5, label: '4.5+ Stars' },
-              { value: 5, label: '5 Stars Only' },
-            ].map((option) => (
-              <button
-                key={option.value}
-                onClick={() => setMinScore(option.value)}
-                className={`px-6 py-4 rounded-full text-lg transition-all font-medium ${
-                  minScore === option.value
-                    ? 'bg-brown text-white shadow-md'
-                    : 'bg-cream text-text-medium hover:bg-brown hover:text-white border border-border'
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => setStep(step + 1)}
-            className="w-full px-6 py-4 bg-brown hover:bg-brown-dark text-white rounded-full transition-all flex items-center justify-center gap-2 text-lg font-medium shadow-md"
-          >
-            <span>Next</span>
-            <ArrowRight className="w-5 h-5" />
-          </button>
-        </div>
-      ),
-    },
-    {
-      title: 'Want something recent?',
-      subtitle: 'Filter by year',
-      content: (
-        <div className="space-y-4">
-          <button
-            onClick={() => { setMostRecent(false); setStep(step + 1); }}
-            className={`w-full px-8 py-6 rounded-full text-xl transition-all font-medium ${
-              !mostRecent
-                ? 'bg-brown text-white shadow-md'
-                : 'bg-cream text-text-medium hover:bg-brown hover:text-white border border-border'
-            }`}
-          >
-            No - Show Me Everything
-          </button>
-          <button
-            onClick={() => { setMostRecent(true); setStep(step + 1); }}
-            className={`w-full px-8 py-6 rounded-full text-xl transition-all font-medium ${
-              mostRecent
-                ? 'bg-brown text-white shadow-md'
-                : 'bg-cream text-text-medium hover:bg-brown hover:text-white border border-border'
-            }`}
-          >
-            Yes - Only 2024-2025
-          </button>
-        </div>
-      ),
-    },
-    {
-      title: 'Any specific vibes?',
-      subtitle: 'Optional - select tags that interest you',
-      content: (
-        <div className="space-y-4">
-          {allTags.length > 0 ? (
-            <div className="flex flex-wrap gap-2 max-h-96 overflow-y-auto p-6 bg-cream rounded-lg border border-border">
-              {allTags.map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={`px-4 py-2 rounded-full text-sm transition-all ${
-                    selectedTags.includes(tag)
-                      ? 'bg-brown text-white shadow-md'
-                      : 'bg-white text-text-medium hover:bg-brown hover:text-white border border-border'
-                  }`}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className="text-text-medium text-center">Loading tags...</p>
-          )}
-          <button
-            onClick={handleFinish}
-            className="w-full px-6 py-4 bg-brown hover:bg-brown-dark text-white rounded-full transition-all flex items-center justify-center gap-2 text-lg font-semibold shadow-lg"
-          >
-            <Sparkles className="w-5 h-5" />
-            <span>Show Me Recommendations!</span>
-          </button>
-        </div>
-      ),
-    },
-  ];
-
-  const currentQuestion = questions[step];
+  const current = questions[step];
 
   return (
     <div className="min-h-screen bg-cream">
@@ -262,25 +180,48 @@ export default function QuizPage() {
               <div
                 className="bg-brown h-full rounded-full transition-all duration-300"
                 style={{ width: `${((step + 1) / questions.length) * 100}%` }}
-              ></div>
+              />
             </div>
           </div>
 
           {/* Question Card */}
           <div className="bg-white rounded-xl shadow-lg p-10 mb-8 border border-border">
-            <h1 className="font-serif text-4xl font-bold mb-3 text-text-dark">
-              {currentQuestion.title}
+            <h1 className="font-serif text-3xl font-bold mb-3 text-text-dark">
+              {current.title}
             </h1>
             <p className="text-text-medium mb-8 text-lg">
-              {currentQuestion.subtitle}
+              {current.subtitle}
             </p>
 
-            {currentQuestion.content}
+            <div className="flex flex-col gap-3">
+              {current.options.map((option) => (
+                <button
+                  key={option.label}
+                  onClick={() => applyAnswer(option.apply)}
+                  className="flex items-center gap-4 px-6 py-5 text-left border-2 border-border hover:border-brown hover:bg-brown hover:text-white rounded-xl text-lg font-medium transition-all group"
+                >
+                  <span className="text-2xl">{option.emoji}</span>
+                  <span>{option.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {step === questions.length - 1 && (
+              <div className="mt-6 pt-6 border-t border-border">
+                <button
+                  onClick={() => finish(state)}
+                  className="w-full px-6 py-4 bg-brown hover:bg-brown-dark text-white rounded-full transition-all flex items-center justify-center gap-2 text-lg font-semibold shadow-lg"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  <span>Show Me Recommendations!</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Navigation */}
           <div className="flex justify-between">
-            {step > 0 && (
+            {step > 0 ? (
               <button
                 onClick={() => setStep(step - 1)}
                 className="flex items-center gap-2 px-6 py-3 border-2 border-brown text-brown hover:bg-brown hover:text-white rounded-full transition-all font-medium"
@@ -288,8 +229,7 @@ export default function QuizPage() {
                 <ArrowLeft className="w-5 h-5" />
                 <span>Back</span>
               </button>
-            )}
-            {step === 0 && (
+            ) : (
               <button
                 onClick={() => router.push('/')}
                 className="flex items-center gap-2 px-6 py-3 border-2 border-brown text-brown hover:bg-brown hover:text-white rounded-full transition-all font-medium"

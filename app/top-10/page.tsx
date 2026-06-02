@@ -1,48 +1,51 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Trophy } from 'lucide-react';
+import { Trophy, Film, Tv } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import EntryCard from '@/components/EntryCard';
 import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/types';
 
 export default function Top10Page() {
-  const [entries, setEntries] = useState<Entry[]>([]);
+  const [movies, setMovies] = useState<Entry[]>([]);
+  const [tvShows, setTvShows] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'movies' | 'tv'>('movies');
 
   useEffect(() => {
-    loadTop10Entries();
+    loadEntries();
   }, []);
 
-  const loadTop10Entries = async () => {
+  const loadEntries = async () => {
     try {
-      const top10Titles = [
-        'Da 5 Bloods',
-        'Coco',
-        'American Factory',
-        'Station Eleven',
-        'Gladbeck: The Hostage Crisis',
-        'Fleishman is in Trouble',
-        'Creed',
-        'Barbie',
-        'Slave Play. Not a Movie. A Play.',
-        'Sinners'
-      ];
+      const [{ data: movieData }, { data: tvData }] = await Promise.all([
+        supabase
+          .from('entries')
+          .select('*')
+          .eq('medium', 'Movie')
+          .order('score', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(10),
+        supabase
+          .from('entries')
+          .select('*')
+          .eq('medium', 'TV')
+          .order('score', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(10),
+      ]);
 
-      const { data, error } = await supabase
-        .from('entries')
-        .select('*')
-        .in('title', top10Titles);
-
-      if (error) throw error;
-      setEntries(data || []);
+      setMovies(movieData || []);
+      setTvShows(tvData || []);
     } catch (error) {
       console.error('Error loading top 10 entries:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  const entries = activeTab === 'movies' ? movies : tvShows;
 
   return (
     <div className="min-h-screen bg-cream">
@@ -53,17 +56,43 @@ export default function Top10Page() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Trophy className="w-12 h-12 text-brown" />
             <h1 className="font-serif text-5xl font-bold text-text-dark">
-              All-Time Top 10
+              Top 10
             </h1>
           </div>
           <p className="text-xl text-text-medium">
-            Our absolute favorites - the cream of the crop
+            The absolute favorites — the cream of the crop
           </p>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex justify-center gap-4 mb-10">
+          <button
+            onClick={() => setActiveTab('movies')}
+            className={`flex items-center gap-2 px-8 py-3 rounded-full text-lg font-medium transition-all ${
+              activeTab === 'movies'
+                ? 'bg-brown text-white shadow-md'
+                : 'bg-white text-text-medium border border-border hover:border-brown hover:text-brown'
+            }`}
+          >
+            <Film className="w-5 h-5" />
+            Top 10 Movies
+          </button>
+          <button
+            onClick={() => setActiveTab('tv')}
+            className={`flex items-center gap-2 px-8 py-3 rounded-full text-lg font-medium transition-all ${
+              activeTab === 'tv'
+                ? 'bg-brown text-white shadow-md'
+                : 'bg-white text-text-medium border border-border hover:border-brown hover:text-brown'
+            }`}
+          >
+            <Tv className="w-5 h-5" />
+            Top 10 TV Shows
+          </button>
         </div>
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-cream border-t-brown"></div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-cream border-t-brown" />
           </div>
         ) : entries.length === 0 ? (
           <div className="text-center py-12">
@@ -72,8 +101,13 @@ export default function Top10Page() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {entries.map((entry) => (
-              <EntryCard key={entry.id} entry={entry} />
+            {entries.map((entry, index) => (
+              <div key={entry.id} className="relative">
+                <div className="absolute -top-3 -left-3 z-10 w-8 h-8 bg-brown text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md">
+                  {index + 1}
+                </div>
+                <EntryCard entry={entry} />
+              </div>
             ))}
           </div>
         )}
