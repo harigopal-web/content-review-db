@@ -7,6 +7,32 @@ import EntryCard from '@/components/EntryCard';
 import { supabase } from '@/lib/supabase';
 import type { Entry } from '@/lib/types';
 
+const TOP_10_MOVIES = [
+  'Mean Girls',
+  'Coco',
+  'American Factory',
+  'Slave Play. Not a Movie. A Play.',
+  'Creed',
+  'Waco: American Apocalypse',
+  'Gladbeck: The Hostage Crisis',
+  'Barbie',
+  'Sinners',
+  'Sorry to Bother You',
+];
+
+const TOP_10_TV = [
+  'Station Eleven',
+  'RHOSLC S2',
+  'Fleishman is in Trouble',
+  'People Just Do Nothing s1-s4',
+  'Formula 1: Drive to Survive S1',
+  'Succession s3',
+  'Summer Job',
+  'Working Moms s7',
+  'Welcome to Wrexham s2',
+  'Outlast S1',
+];
+
 export default function Top10Page() {
   const [movies, setMovies] = useState<Entry[]>([]);
   const [tvShows, setTvShows] = useState<Entry[]>([]);
@@ -20,24 +46,16 @@ export default function Top10Page() {
   const loadEntries = async () => {
     try {
       const [{ data: movieData }, { data: tvData }] = await Promise.all([
-        supabase
-          .from('entries')
-          .select('*')
-          .eq('medium', 'Movie')
-          .order('score', { ascending: false })
-          .order('created_at', { ascending: false })
-          .limit(10),
-        supabase
-          .from('entries')
-          .select('*')
-          .eq('medium', 'TV')
-          .order('score', { ascending: false })
-          .order('created_at', { ascending: false })
-          .limit(10),
+        supabase.from('entries').select('*').in('title', TOP_10_MOVIES),
+        supabase.from('entries').select('*').in('title', TOP_10_TV),
       ]);
 
-      setMovies(movieData || []);
-      setTvShows(tvData || []);
+      // Sort results to match the curated order
+      const sortByList = (data: Entry[], list: string[]) =>
+        list.map((title) => data?.find((e) => e.title === title)).filter(Boolean) as Entry[];
+
+      setMovies(sortByList(movieData || [], TOP_10_MOVIES));
+      setTvShows(sortByList(tvData || [], TOP_10_TV));
     } catch (error) {
       console.error('Error loading top 10 entries:', error);
     } finally {
